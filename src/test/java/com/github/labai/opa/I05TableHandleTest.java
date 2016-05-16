@@ -4,11 +4,13 @@ import com.github.labai.opa.IntTests.AblIntTestBase;
 import com.github.labai.opa.IntTests.SampleTable;
 import com.github.labai.opa.Opa.*;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.List;
 
 
+@Ignore
 public class I05TableHandleTest extends AblIntTestBase{
 
 	@OpaProc(proc="jpx/test/opa/test_05_table_handle.p")

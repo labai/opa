@@ -1,15 +1,22 @@
 package com.github.labai.opa;
 
 import com.github.labai.opa.IntTests.AblIntTestBase;
-import com.github.labai.opa.Opa.*;
+import com.github.labai.opa.Opa.IoDir;
+import com.github.labai.opa.Opa.OpaField;
+import com.github.labai.opa.Opa.OpaParam;
+import com.github.labai.opa.Opa.OpaProc;
+import com.github.labai.opa.Opa.OpaTable;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by Augustus on 2014.12.18.
  */
+@Ignore
 public class I06EnumTest extends AblIntTestBase {
 
 	public enum SampleEnum {
@@ -32,6 +39,9 @@ public class I06EnumTest extends AblIntTestBase {
 	public static class TableOutEnumOpp {
 		@OpaParam
 		public SampleEnum enumIn;
+
+		@OpaParam(table=SampleTableWithEnum.class)
+		public List<SampleTableWithEnum> ttin;
 
 		@OpaParam(io = IoDir.OUT)
 		public SampleEnum enumOut1;
@@ -64,7 +74,15 @@ public class I06EnumTest extends AblIntTestBase {
 
 		TableOutEnumOpp opp = new TableOutEnumOpp();
 		opp.enumIn = SampleEnum.ENUM_2;
+
+		SampleTableWithEnum rec1 = new SampleTableWithEnum();
+		rec1.enumVal = SampleEnum.ENUM_2;
+
+		opp.ttin = new ArrayList<SampleTableWithEnum>();
+		opp.ttin.add(rec1);
+
 		server.runProc(opp);
+
 
 		String s0 = "null"; // empty string will be converted to null
 		String s1 = "null";
@@ -73,6 +91,7 @@ public class I06EnumTest extends AblIntTestBase {
 		Assert.assertEquals(s0, opp.tt.get(0).toString());
 		Assert.assertEquals(s1, opp.tt.get(1).toString());
 		Assert.assertEquals(s2, opp.tt.get(2).toString());
+		Assert.assertEquals("ENUM_2", opp.tt.get(3).toString()); // must be copy form ttin
 
 		Assert.assertEquals(opp.enumOut1, SampleEnum.ENUM_2);
 		Assert.assertEquals(opp.enumOut2, null);

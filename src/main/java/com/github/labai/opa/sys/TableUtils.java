@@ -271,6 +271,9 @@ public class TableUtils {
 					cal.setTime((Date)field.get(bean));
 					row.add(cal);
 				}
+			} else if (type.isEnum()) { // enum as char
+				String sval = field.get(bean).toString();
+				row.add(sval);
 			} else {
 				row.add(field.get(bean)); // other types - as is
 			}
@@ -658,7 +661,15 @@ public class TableUtils {
 			throw new RuntimeException("Unimplemented InputResultSet method");
 		}
 
-		public <T> T unwrap(Class<T> iface) throws SQLException {
+        public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
+            throw new RuntimeException("Unimplemented InputResultSet method");
+        }
+
+        public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
+            throw new RuntimeException("Unimplemented InputResultSet method");
+        }
+
+        public <T> T unwrap(Class<T> iface) throws SQLException {
 			throw new RuntimeException("Unimplemented InputResultSet method");
 		}
 

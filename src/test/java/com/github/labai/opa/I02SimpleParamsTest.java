@@ -7,6 +7,7 @@ import com.github.labai.opa.Opa.IoDir;
 import com.github.labai.opa.Opa.OpaParam;
 import com.github.labai.opa.Opa.OpaProc;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -15,6 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
+@Ignore
 public class I02SimpleParamsTest extends AblIntTestBase {
 
 	@OpaProc(proc="jpx/test/opa/test_02_simple_params.p")

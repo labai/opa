@@ -6,6 +6,7 @@ import com.github.labai.opa.Opa.IoDir;
 import com.github.labai.opa.Opa.OpaParam;
 import com.github.labai.opa.Opa.OpaProc;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+@Ignore
 public class I04TableInOutTest extends AblIntTestBase{
 
 	@OpaProc(proc="jpx/test/opa/test_04_table_inout.p")

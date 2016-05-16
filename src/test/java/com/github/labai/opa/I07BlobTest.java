@@ -8,6 +8,7 @@ import com.github.labai.opa.Opa.OpaParam;
 import com.github.labai.opa.Opa.OpaProc;
 import com.github.labai.opa.Opa.OpaTable;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
@@ -16,6 +17,7 @@ import java.util.List;
 /**
  * Created by Augustus on 2015.06.19.
  */
+@Ignore
 public class I07BlobTest extends AblIntTestBase {
 
 	@OpaTable
