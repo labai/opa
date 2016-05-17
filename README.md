@@ -34,7 +34,7 @@ It is required to add dependency in pom.xml, to use OPA:
 <dependency>
     <groupId>com.github.labai</groupId>
     <artifactId>opa</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.2</version>
 </dependency>
 ```
 Also `o4glrt.jar` from OpenEdge install dir must be accessible. 
