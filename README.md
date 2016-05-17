@@ -4,7 +4,7 @@
 ----
 ## ABOUT
 
-OPA is adapter for OpenEdge ABL (Progress 4GL) procedure call from java.
+OPA is adapter for OpenEdge ABL (Progress 4GL) procedure call from Java.
 
 #### Problem to solve
 
@@ -20,7 +20,7 @@ If procedure parameters (input/output parameters, temp-table) have changed, then
 
 #### Solution
 
-OPA offers flexible and easy call of OpenEdge procedures with runtime parameter mapping.
+OPA offers flexible and easy way to call of OpenEdge procedures with runtime parameter mapping.
 
 OPA uses dedicated class with Java annotations to describe parameters and temp-table fields (Java list of entities). 
 When you need to call OpenEdge ABL procedure, you create instance of that class, assign values to input parameters, fill List (temp-table) and call OpenEdge procedure.
@@ -48,7 +48,6 @@ I recommend to add it as artifact into you maven repository and use as dependenc
 - Support connection pool.
 - Support wide range of types, used in Java and Progress.
 - Temp-table can be automatically mapped to List.
-- AppServer connection type can be STATE_FREE, STATELESS.
 
 ----
 ## SAMPLES
@@ -137,4 +136,4 @@ public class OpaDemo2 {
 ```
 
 More samples can be found in OPA tests
-
+https://github.com/labai/opa/tree/master/src/test/java/com/github/labai/opa
