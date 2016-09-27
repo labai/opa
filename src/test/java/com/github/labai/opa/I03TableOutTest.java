@@ -1,6 +1,5 @@
 package com.github.labai.opa;
 
-import com.progress.open4gl.Rowid;
 import com.github.labai.opa.IntTests.AblIntTestBase;
 import com.github.labai.opa.IntTests.SampleTable;
 import com.github.labai.opa.Opa.DataType;
@@ -9,8 +8,8 @@ import com.github.labai.opa.Opa.OpaField;
 import com.github.labai.opa.Opa.OpaParam;
 import com.github.labai.opa.Opa.OpaProc;
 import com.github.labai.opa.Opa.OpaTable;
+import com.progress.open4gl.Rowid;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -20,7 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 
-@Ignore
+//@Ignore
 public class I03TableOutTest extends AblIntTestBase{
 
 	@OpaProc(proc = "jpx/test/opa/test_03_table_out.p")

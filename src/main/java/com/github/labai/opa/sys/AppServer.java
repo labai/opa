@@ -1,5 +1,6 @@
 package com.github.labai.opa.sys;
 
+import com.github.labai.opa.OpaServer.SessionModel;
 import com.progress.open4gl.Open4GLException;
 import com.progress.open4gl.RunTime4GLException;
 import com.github.labai.opa.Opa;
@@ -17,24 +18,24 @@ import java.sql.SQLException;
 /**
  * For internal usage only (is not part of api)
  *
- * @author Augustas Mickus
+ * @author Augustus
  */
 public class AppServer {
 	private final static Logger logger = LoggerFactory.getLogger(Opa.class);
 
-	private static final String PROGRESS_PROPS_KEY_SESSION_MODEL = "PROGRESS.Session.sessionModel";
+	static final String PROGRESS_PROPS_KEY_SESSION_MODEL = "PROGRESS.Session.sessionModel";
 
 	private static final long DEFAULT_WAIT_TIMEOUT_MILIS = 30000L; // 30 s
 	private static final int DEFAULT_MAX_CONN = 10;
 
 	private JpxConnPool pool;
 
-	public AppServer(String serverUrl, String userName, String password) {
+	public AppServer(String serverUrl, String userName, String password, SessionModel sessionModel) {
 		super();
 		GenericObjectPoolConfig poolConfig = new GenericObjectPoolConfig();
 		poolConfig.setMaxWaitMillis(DEFAULT_WAIT_TIMEOUT_MILIS);
 		poolConfig.setMaxTotal(DEFAULT_MAX_CONN);
-		ConnParams connParams = new ConnParams(serverUrl, userName, password);
+		ConnParams connParams = new ConnParams(serverUrl, userName, password, sessionModel);
 		pool = new JpxConnPool(connParams, poolConfig);
 	}
 
@@ -108,11 +109,6 @@ public class AppServer {
 				}
 			}
 		}
-	}
-
-	// warning: static
-	public static void setSessionModel(int sessionModel) {
-		com.progress.open4gl.RunTimeProperties.setIntProperty(PROGRESS_PROPS_KEY_SESSION_MODEL, sessionModel);
 	}
 
 	public void setMaxPoolSize(int maxConnections) {

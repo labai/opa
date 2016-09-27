@@ -8,11 +8,11 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * OpenEdge Procedure Adapter.
- * <p/>
+ * <p>
  * Enums, annotations, config and etc.
- * <p/>
+ * </p>
  *
- * @author Augustas Mickus
+ * @author Augustus
  */
 public class Opa {
 

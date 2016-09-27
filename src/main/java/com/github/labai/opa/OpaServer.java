@@ -3,7 +3,7 @@ package com.github.labai.opa;
 import com.github.labai.opa.sys.AppServer;
 
 /**
- * @author Augustas Mickus
+ * @author Augustus
  */
 public class OpaServer {
 
@@ -12,21 +12,14 @@ public class OpaServer {
 	public enum SessionModel {
 		STATELESS (0),
 		STATE_FREE (1);
-		final int id;
+		public final int progressId;
 		private SessionModel(int id) {
-			this.id = id;
+			this.progressId = id;
 		}
 	}
 
 	public OpaServer(String serverUrl, String userName, String password, SessionModel sessionModel) {
-		if (sessionModel != null) {
-			setSessionModel(sessionModel);
-		}
-		appServer = new AppServer(serverUrl, userName, password);
-	}
-
-	public OpaServer(String serverUrl, String userName, String password) {
-		this(serverUrl, userName, password, null);
+		appServer = new AppServer(serverUrl, userName, password, sessionModel);
 	}
 
 	/** Run OpenEdge procedure on AppServer.
@@ -52,14 +45,6 @@ public class OpaServer {
 	/** Set connection timeout in milliseconds. Default is 30 s */
 	public void setConnectionTimeout(long timeoutMs) {
 		appServer.setConnectionTimeout(timeoutMs);
-	}
-
-	/**
-	 * Set session model.
-	 * Warning: static method - global (classLoader) scoped
-	 * */
-	public void setSessionModel(SessionModel mode) {
-		AppServer.setSessionModel(mode.id);
 	}
 
 }

@@ -5,7 +5,7 @@ import com.github.labai.opa.OpaException;
 /**
  * For internal usage only (is not part of api)
  *
- * @author Augustas Mickus
+ * @author Augustus
  */
 class Exceptions {
 

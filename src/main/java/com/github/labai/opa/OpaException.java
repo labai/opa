@@ -1,7 +1,7 @@
 package com.github.labai.opa;
 
 /**
- * @author Augustas Mickus
+ * @author Augustus
  */
 public class OpaException extends Exception {
 

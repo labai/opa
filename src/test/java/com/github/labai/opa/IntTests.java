@@ -1,11 +1,12 @@
 package com.github.labai.opa;
 
-import com.progress.open4gl.Rowid;
 import com.github.labai.opa.Opa.DataType;
 import com.github.labai.opa.Opa.OpaField;
 import com.github.labai.opa.Opa.OpaTable;
 import com.github.labai.opa.Opa.OpaTransient;
 import com.github.labai.opa.OpaServer.SessionModel;
+import com.progress.open4gl.Rowid;
+import org.junit.Assume;
 import org.junit.Before;
 
 import java.math.BigDecimal;
@@ -26,8 +27,8 @@ public class IntTests {
 
 		@Before
 		public void init() {
-			server = new OpaServer(TestParams.APP_SERVER, TestParams.APP_USER, TestParams.APP_USER);
-			server.setSessionModel(SessionModel.STATE_FREE);
+			Assume.assumeTrue("Is integration tests enabled?", TestParams.INT_TESTS_ENABLED);
+			server = new OpaServer(TestParams.APP_SERVER, TestParams.APP_USER, TestParams.APP_USER, SessionModel.STATE_FREE);
 		}
 
 		protected void log(String msg){

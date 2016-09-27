@@ -2,15 +2,18 @@ package com.github.labai.opa;
 
 import com.github.labai.opa.IntTests.AblIntTestBase;
 import com.github.labai.opa.IntTests.SampleTable;
-import com.github.labai.opa.Opa.*;
+import com.github.labai.opa.Opa.IoDir;
+import com.github.labai.opa.Opa.OpaField;
+import com.github.labai.opa.Opa.OpaParam;
+import com.github.labai.opa.Opa.OpaProc;
+import com.github.labai.opa.Opa.OpaTable;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.List;
 
 
-@Ignore
+//@Ignore
 public class I05TableHandleTest extends AblIntTestBase{
 
 	@OpaProc(proc="jpx/test/opa/test_05_table_handle.p")

@@ -4,10 +4,11 @@ import com.github.labai.opa.Opa.IoDir;
 import com.github.labai.opa.Opa.OpaParam;
 import com.github.labai.opa.Opa.OpaProc;
 import com.github.labai.opa.OpaException;
+import com.github.labai.opa.OpaServer.SessionModel;
 import com.github.labai.opa.TestParams;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -17,6 +18,7 @@ import java.math.BigDecimal;
  *
  * Test max pool connections
  */
+//@Ignore
 public class I07PoolTest {
 	private static final String PROC_07_NAME = "jpx/test/opa/test_07_wait.p";
 
@@ -24,9 +26,8 @@ public class I07PoolTest {
 
 	@Before
 	public void init() {
-		server = new AppServer(TestParams.APP_SERVER, TestParams.APP_USER, TestParams.APP_PASSWORD);
-		server.setSessionModel(1); // STATE_FREE
-
+		Assume.assumeTrue("Is integration tests enabled?", TestParams.INT_TESTS_ENABLED);
+		server = new AppServer(TestParams.APP_SERVER, TestParams.APP_USER, TestParams.APP_PASSWORD, SessionModel.STATE_FREE);
 	}
 
 	protected void log(String msg){
@@ -49,7 +50,6 @@ public class I07PoolTest {
 	/**
 	 * Test pool connections
 	 */
-	@Ignore
 	@Test
 	public void testPoolConnMax2() throws OpaException, InterruptedException {
 		server.setMaxPoolSize(2);
@@ -70,7 +70,6 @@ public class I07PoolTest {
 		Assert.assertEquals(2, server.getPool().getNumIdle()); // 2 idle connections - limited by pool
 	}
 
-	@Ignore
 	@Test
 	public void testPoolConnMax5() throws OpaException, InterruptedException {
 		server.setMaxPoolSize(5);

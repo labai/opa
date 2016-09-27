@@ -42,7 +42,7 @@ import java.util.Set;
 /**
  * For internal usage only (is not part of api)
  *
- * @author Augustas Mickus
+ * @author Augustus
  */
 public class TableUtils {
 	final static Logger logger = LoggerFactory.getLogger(Opa.class);

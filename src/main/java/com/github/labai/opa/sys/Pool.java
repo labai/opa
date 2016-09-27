@@ -1,5 +1,6 @@
 package com.github.labai.opa.sys;
 
+import com.github.labai.opa.OpaServer.SessionModel;
 import com.progress.open4gl.Open4GLException;
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
@@ -19,16 +20,18 @@ class Pool {
 		final String urlString;
 		final String userId;
 		final String password;
+		final SessionModel sessionModel;
 
-		public ConnParams(String urlString, String userId, String password) {
+		public ConnParams(String urlString, String userId, String password, SessionModel sessionModel) {
 			this.password = password;
 			this.userId = userId;
 			this.urlString = urlString;
+			this.sessionModel = sessionModel;
 		}
 
 		@Override
 		public String toString() {
-			return "Conn{url='" + urlString + "',userId=" + userId + ",password=*****}";
+			return "Conn{url='" + urlString + "',userId=" + userId + ",password=*****,sessionModel=" + sessionModel + "}";
 		}
 	}
 
@@ -54,7 +57,7 @@ class Pool {
 
 		@Override
 		public JavaProxyAgent create() throws Exception {
-			return new JavaProxyAgent(connParams.urlString, connParams.userId, connParams.password, "");
+			return new JavaProxyAgent(connParams.urlString, connParams.userId, connParams.password, "", connParams.sessionModel);
 		}
 
 		@Override
