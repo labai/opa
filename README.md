@@ -30,7 +30,7 @@ OPA automatically (on the fly) maps input parameters from Java class to OpenEdge
 ## USAGE
 
 It is required to add dependency in pom.xml, to use OPA:
-````
+```xml
 <dependency>
     <groupId>com.github.labai</groupId>
     <artifactId>opa</artifactId>
@@ -53,7 +53,7 @@ I recommend to add it as artifact into you maven repository and use as dependenc
 ## SAMPLES
 
 #### Sample 1: with simple parameters
-```
+```java
 public class OpaDemo {
     public static void main(String[] args) throws OpaException {
         // in real app OpaServer should be as service (single per application)
@@ -90,7 +90,7 @@ define output parameter err      as character initial ?.
 ```
 
 #### Sample 2: with output temp-table
-```
+```java
 public class OpaDemo2 {
 
     public static void main(String[] args) throws OpaException {
