@@ -1,10 +1,10 @@
 package com.github.labai.opa;
 
-import com.github.labai.opa.IntTests.AblIntTestBase;
-import com.github.labai.opa.IntTests.SampleTable;
 import com.github.labai.opa.Opa.IoDir;
 import com.github.labai.opa.Opa.OpaParam;
 import com.github.labai.opa.Opa.OpaProc;
+import com.github.labai.opa.IntTests.AblIntTestBase;
+import com.github.labai.opa.IntTests.SampleTable;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-//@Ignore
 public class I04TableInOutTest extends AblIntTestBase{
 
 	@OpaProc(proc="jpx/test/opa/test_04_table_inout.p")
@@ -57,7 +56,7 @@ public class I04TableInOutTest extends AblIntTestBase{
 		//
 
 		SampleTable tt1 = new SampleTable();
-		tt1.charVal = "sending something";
+		tt1.charValx = "sending something";
 		tt1.setIntVal(1);
 		tt1.int64Val = 1L;
 		tt1.decVal = new BigDecimal("1.1");
@@ -76,14 +75,14 @@ public class I04TableInOutTest extends AblIntTestBase{
 
 		server.runProc(opp);
 
-		String sout0 = "sending something|200001|1|1.1|null|true|null|null|null";
-		String sinout0 = "sending something|200002|1|1.1|null|true|null|null|null";
+		String sout0 = "sending something|200001|1|1.1|null|true|null|null|null|null";
+		String sinout0 = "sending something|200002|1|1.1|null|true|null|null|null|null";
 
 		/*
-		for (SampleTable tt: opp.ttout)
-			System.out.println(IntTests.sampleTableToString(tt));
-		for (SampleTable tt: opp.ttinout)
-			System.out.println(IntTests.sampleTableToString(tt));
+		for (SampleTable ttout: opp.ttout)
+			System.out.println(IntTests.sampleTableToString(ttout));
+		for (SampleTable ttout: opp.ttinout)
+			System.out.println(IntTests.sampleTableToString(ttout));
 		*/
 		Assert.assertEquals(sout0, opp.ttout.get(0).toString());
 		Assert.assertEquals(sinout0, opp.ttinout.get(0).toString());

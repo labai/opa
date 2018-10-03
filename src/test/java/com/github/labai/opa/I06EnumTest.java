@@ -15,7 +15,6 @@ import java.util.List;
 /**
  * Created by Augustus on 2014.12.18.
  */
-//@Ignore
 public class I06EnumTest extends AblIntTestBase {
 
 	public enum SampleEnum {

@@ -1,12 +1,12 @@
 package com.github.labai.opa.sys;
 
-import com.github.labai.opa.OpaServer.SessionModel;
-import com.progress.open4gl.Open4GLException;
-import com.progress.open4gl.RunTime4GLException;
 import com.github.labai.opa.Opa;
 import com.github.labai.opa.OpaException;
+import com.github.labai.opa.OpaServer.SessionModel;
 import com.github.labai.opa.sys.Exceptions.OpaSessionTimeoutException;
 import com.github.labai.opa.sys.Exceptions.OpaStructureException;
+import com.progress.open4gl.Open4GLException;
+import com.progress.open4gl.RunTime4GLException;
 import com.github.labai.opa.sys.Pool.ConnParams;
 import com.github.labai.opa.sys.Pool.JpxConnPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -62,8 +62,10 @@ public class AppServer {
 			} catch (SQLException e) {
 				throw new OpaException("4GL ResultSet error: " + e.getMessage(), e);
 			} catch (Open4GLException e) {
+				logger.debug("runProc(1) Open4GLException, will try again: {}", e.getMessage());
 				// can be connection problems - retry
 			} catch (OpaSessionTimeoutException e) {
+				logger.debug("runProc(1) OpaSessionTimeoutException, will try again: {}", e.getMessage());
 				// session timeout - retry
 			}
 
@@ -111,8 +113,13 @@ public class AppServer {
 		}
 	}
 
+
 	public void setMaxPoolSize(int maxConnections) {
 		pool.setMaxTotal(maxConnections);
+	}
+
+	public void setConnectionTTLSec(int ttlInSec) {
+		pool.setConnectionTTLSec(ttlInSec);
 	}
 
 	// 0 = no timeout

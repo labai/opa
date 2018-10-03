@@ -3,14 +3,15 @@ package com.github.labai.opa;
 import com.progress.open4gl.Parameter;
 import com.progress.open4gl.dynamicapi.ParameterSet;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
  * OpenEdge Procedure Adapter.
- * <p>
+ * <p/>
  * Enums, annotations, config and etc.
- * </p>
+ * <p/>
  *
  * @author Augustus
  */
@@ -57,6 +58,7 @@ public class Opa {
 		ROWID(Parameter.PRO_ROWID, BOTH), // 13
 		//RAW(Parameter.PRO_RAW, BOTH), // 8
 		// allowed in temp-table only
+		RECID(Parameter.PRO_RECID, TT), // 7
 		BLOB(Parameter.PRO_BLOB, TT), // 18
 		CLOB(Parameter.PRO_CLOB, TT), // 19
 		// allowed in params only
@@ -81,6 +83,7 @@ public class Opa {
 	 * Class is ABL procedure parameters class
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
+	@Documented
 	public @interface OpaProc {
 		/**
 		 * ABL procedure name with path
@@ -92,6 +95,7 @@ public class Opa {
 	 * Parameter for ABL procedure
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
+	@Documented
 	public @interface OpaParam {
 		/**
 		 * parameter direction: IN, OUT, INOUT
@@ -110,6 +114,7 @@ public class Opa {
 	 * Class is an entity (temp-table)
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
+	@Documented
 	public @interface OpaTable {
 		/**
 		 * all entity fields will be consider as OpaField (even annotation OpaField is missing)
@@ -121,6 +126,7 @@ public class Opa {
 	 * Field is an entity field
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
+	@Documented
 	public @interface OpaField {
 		DataType dataType() default DataType.AUTO;
 		/** set OE tt field name if differs from Java entity field name */
@@ -131,6 +137,7 @@ public class Opa {
 	 * Mark entity field as free (non Opa) field (in case of allowOmitOpaField)
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
+	@Documented
 	public @interface OpaTransient {
 	}
 

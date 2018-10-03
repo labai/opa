@@ -13,8 +13,7 @@ import org.junit.Test;
 import java.util.List;
 
 
-//@Ignore
-public class I05TableHandleTest extends AblIntTestBase{
+public class I05TableHandleTest extends AblIntTestBase {
 
 	@OpaProc(proc="jpx/test/opa/test_05_table_handle.p")
 	public static class TableHandleOpp {
@@ -39,9 +38,9 @@ public class I05TableHandleTest extends AblIntTestBase{
 		opp.someId = "00000038";
 		server.runProc(opp);
 
-		String s0 = "Character value|101234|-123456789012|1.23|2014-02-15|true|2014-02-15T00:00:00|2014-02-15T00:00:00.000+0200|null";
-		String s1 = "string|100001|1|1.1|2014-01-15|true|2014-01-15T00:00:00|2014-01-15T00:00:00.000+0200|null";
-		String s2 = "null|null|null|null|null|null|null|null|null";
+		String s0 = "Character value|101234|-123456789012|1.23|2014-02-15|true|2014-02-15T00:00:00|2014-02-15T00:00:00.000+0200|null|100";
+		String s1 = "null|null|null|null|null|null|null|null|null|101";
+		String s2 = "string|100001|1|1.1|2014-01-15|true|2014-01-15T00:00:00|2014-01-15T00:00:00.000+0200|null|102";
 
 		Assert.assertEquals(s0, opp.tt.get(0).toString());
 		Assert.assertEquals(s1, opp.tt.get(1).toString());
@@ -56,7 +55,7 @@ public class I05TableHandleTest extends AblIntTestBase{
 	//  b) different fields between OE and Java
 	///////////////////////////////////////////////////////////////////
 
-	@OpaTable
+	@OpaTable(allowOmitOpaField = true)
 	private static class SampleTable2 {
 		@OpaField
 		public String charVal;
@@ -98,8 +97,8 @@ public class I05TableHandleTest extends AblIntTestBase{
 		server.runProc(opp);
 
 		String s0 = "Character value|1234|AA";
-		String s1 = "string|1|AA";
-		String s2 = "null|null|AA";
+		String s1 = "null|null|AA";
+		String s2 = "string|1|AA";
 
 		Assert.assertEquals(s0, opp.tt.get(0).toString());
 		Assert.assertEquals(s1, opp.tt.get(1).toString());

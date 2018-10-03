@@ -1,12 +1,12 @@
 package com.github.labai.opa.sys;
 
+import com.github.labai.opa.sys.Exceptions.OpaStructureException;
 import com.progress.open4gl.*;
 import com.progress.open4gl.dynamicapi.ParameterSet;
 import com.github.labai.opa.Opa.DataType;
 import com.github.labai.opa.Opa.IoDir;
 import com.github.labai.opa.Opa.OpaParam;
 import com.github.labai.opa.Opa.OpaProc;
-import com.github.labai.opa.sys.Exceptions.OpaStructureException;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -115,7 +115,7 @@ class ParamUtils {
 				if (pp.dataType() == DataType.MEMPTR) {
 					if (pp.io() == IoDir.IN || pp.io() == IoDir.INOUT) {
 						byte[] data = (byte[]) field.get(bean);
-						paramSet.setMemptrParameter(iPos, new Memptr(data), ioId);
+						paramSet.setMemptrParameter(iPos, (data == null ? null : new Memptr(data)), ioId);
 					} else {
 						paramSet.setMemptrParameter(iPos, null, ioId);
 					}

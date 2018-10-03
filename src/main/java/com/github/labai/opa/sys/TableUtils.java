@@ -1,11 +1,5 @@
 package com.github.labai.opa.sys;
 
-import com.progress.open4gl.InputResultSet;
-import com.progress.open4gl.ResultSetHolder;
-import com.progress.open4gl.Rowid;
-import com.progress.open4gl.dynamicapi.MetaSchema;
-import com.progress.open4gl.dynamicapi.ResultSet;
-import com.progress.open4gl.dynamicapi.ResultSetMetaData;
 import com.github.labai.opa.Opa;
 import com.github.labai.opa.Opa.DataType;
 import com.github.labai.opa.Opa.IoDir;
@@ -14,6 +8,12 @@ import com.github.labai.opa.Opa.OpaParam;
 import com.github.labai.opa.Opa.OpaTable;
 import com.github.labai.opa.Opa.OpaTransient;
 import com.github.labai.opa.sys.Exceptions.OpaStructureException;
+import com.progress.open4gl.InputResultSet;
+import com.progress.open4gl.ResultSetHolder;
+import com.progress.open4gl.Rowid;
+import com.progress.open4gl.dynamicapi.MetaSchema;
+import com.progress.open4gl.dynamicapi.ResultSet;
+import com.progress.open4gl.dynamicapi.ResultSetMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,7 +142,7 @@ public class TableUtils {
 			}
 		}
 		for (Field f : entityFields.values()) {
-			if (foundInOE.contains(f) == false)
+			if (! foundInOE.contains(f))
 				logger.warn("Field '{}' of '{}' was not found in resultSet (OE temp-table)", f.getName(), clazz.getName());
 		}
 
@@ -232,6 +232,8 @@ public class TableUtils {
 								if (blob != null) {
 									byte[] data = blob.getBytes(1, (int)blob.length()); // int - max 2GB
 									colDef.setValue(bean, data);
+								} else {
+									colDef.setValue(bean, null);
 								}
 								break;
 							default: // RAW?
@@ -282,8 +284,8 @@ public class TableUtils {
 	}
 
 
-	static java.sql.ResultSet listToResultSet (List<?> list, Class<?> clazz) {
-		return (java.sql.ResultSet) new OpaInputResultSet(list, clazz);
+	static java.sql.ResultSet listToResultSet (List<?> rowList, Class<?> clazz) {
+		return (java.sql.ResultSet) new OpaInputResultSet(rowList, clazz);
 	}
 
 
@@ -351,6 +353,9 @@ public class TableUtils {
 	private static DataType ablType (Field field) throws OpaStructureException {
 		Class<?> type = field.getType();
 		if (type.isAssignableFrom(Long.class) || type == long.class) {
+			DataType datatype = declaredDataType(field);
+			if (datatype == DataType.RECID)
+				return datatype;
 			return DataType.INT64;
 		} else if (type.isAssignableFrom(Integer.class) || type == int.class) {
 			return DataType.INTEGER;
@@ -393,12 +398,11 @@ public class TableUtils {
 
 	// return null if it is not OpaField, and name of field, if it is OpaField
 	private static String getOpaName (Field field, boolean allowOmitOpaField) {
-		OpaField af = null;
+		OpaField af = field.getAnnotation(OpaField.class);
 		if (allowOmitOpaField) {
 			if (field.getAnnotation(OpaTransient.class) != null)
 				return null;
 		} else {
-			af = field.getAnnotation(OpaField.class);
 			if (af == null)
 				return null;
 		}
@@ -415,7 +419,7 @@ public class TableUtils {
 	\* ***************************************************************/
 	static class OpaInputResultSet extends InputResultSet {
 
-		private List<?> list;
+		private List<?> rowList;
 		private Class<?> clazz;
 		private int rowNum;
 		private List<Object> currentRow = null;
@@ -423,9 +427,9 @@ public class TableUtils {
 		public OpaInputResultSet(List<?> list, Class<?> clazz) {
 			this.clazz = clazz;
 			if (list == null)
-				this.list = new ArrayList<Object>();
+				this.rowList = new ArrayList<Object>();
 			else
-				this.list = new ArrayList<Object>(list);
+				this.rowList = new ArrayList<Object>(list);
 			rowNum = -1;
 		}
 
@@ -442,7 +446,7 @@ public class TableUtils {
 		public Object getObject(int pos) throws SQLException {
 			try {
 				if (currentRow == null)
-					currentRow = TableUtils.beanToList(list.get(rowNum));
+					currentRow = TableUtils.beanToList(rowList.get(rowNum));
 				return currentRow.get(pos - 1);
 			} catch (IllegalArgumentException e) {
 				throw new SQLException(e);
@@ -455,7 +459,7 @@ public class TableUtils {
 		public boolean next() throws SQLException {
 			++rowNum;
 			currentRow = null;
-			return rowNum < list.size();
+			return rowNum < rowList.size();
 		}
 
 		@Override
@@ -661,15 +665,15 @@ public class TableUtils {
 			throw new RuntimeException("Unimplemented InputResultSet method");
 		}
 
-        public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
-            throw new RuntimeException("Unimplemented InputResultSet method");
-        }
+		public <T> T getObject(int columnIndex, Class<T> type) throws SQLException {
+			throw new RuntimeException("Unimplemented InputResultSet method");
+		}
 
-        public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
-            throw new RuntimeException("Unimplemented InputResultSet method");
-        }
+		public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
+			throw new RuntimeException("Unimplemented InputResultSet method");
+		}
 
-        public <T> T unwrap(Class<T> iface) throws SQLException {
+		public <T> T unwrap(Class<T> iface) throws SQLException {
 			throw new RuntimeException("Unimplemented InputResultSet method");
 		}
 

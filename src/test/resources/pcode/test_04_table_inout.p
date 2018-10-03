@@ -16,6 +16,7 @@ def temp-table ttx no-undo
     field tmVal    as datetime init 02/15/2014
     field tmtzVal  as datetime-tz init 02/15/2014
     field rowid    as rowid
+    field recid1   as recid
     /* TODO
     field raw      as raw
     */

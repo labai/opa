@@ -8,7 +8,7 @@
 
 */
 
-def temp-table tt no-undo
+def temp-table tt1 no-undo
     field charVal  as char init "Character value"
     field intVal   as int  init 1234
     field int64Val as int64 init -123456789012
@@ -18,45 +18,50 @@ def temp-table tt no-undo
     field tmVal    as datetime init 02/15/2014
     field tmtzVal  as datetime-tz init 02/15/2014
     field rowid    as rowid
+    field recid1   as recid
     /* TODO
     field raw      as raw
     */
-    index charVal charVal
+    index recid1 recid1
     .
 
 /*********************************************************************/
 def input param pCharVal  as char no-undo.
-def output param table for tt.
+def output param table for tt1.
 def output param errorCode as char no-undo init ?.
 def output param errorMessage as char no-undo init ?.
 /*********************************************************************/
 
 /* default values */
-create tt.
+create tt1.
+tt1.recid1 = 100.
 
 /* nulls */
-create tt.
-tt.charVal  = ?.
-tt.intVal   = ?.
-tt.int64Val = ?.
-tt.decVal   = ?.
-tt.dateVal  = ?.
-tt.logVal   = ?.
-tt.tmVal    = ?.
-tt.tmtzVal  = ?.
-tt.rowid    = ?.
+create tt1.
+tt1.charVal  = ?.
+tt1.intVal   = ?.
+tt1.int64Val = ?.
+tt1.decVal   = ?.
+tt1.dateVal  = ?.
+tt1.logVal   = ?.
+tt1.tmVal    = ?.
+tt1.tmtzVal  = ?.
+tt1.rowid    = ?.
+tt1.recid1   = 101.
+message "recid(tt1)" recid(tt1).
 
 /* normal case */
-create tt.
-tt.charVal  = "string".
-tt.intVal   = 1.
-tt.int64Val = 1.
-tt.decVal   = 1.1.
-tt.dateVal  = 01/15/2014.
-tt.logVal   = true.
-tt.tmVal    = 01/15/2014.
-tt.tmtzVal  = 01/15/2014.
-tt.rowid    = rowid(tt).
-
+create tt1.
+tt1.charVal  = "string".
+tt1.intVal   = 1.
+tt1.int64Val = 1.
+tt1.decVal   = 1.1.
+tt1.dateVal  = 01/15/2014.
+tt1.logVal   = true.
+tt1.tmVal    = 01/15/2014.
+tt1.tmtzVal  = 01/15/2014.
+tt1.rowid    = rowid(tt1).
+tt1.recid1   = 102. // recid(tt1)
+message "recid(tt1-2)" recid(tt1).
 
 return "this is return-value".

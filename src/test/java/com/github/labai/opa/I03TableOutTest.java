@@ -1,7 +1,5 @@
 package com.github.labai.opa;
 
-import com.github.labai.opa.IntTests.AblIntTestBase;
-import com.github.labai.opa.IntTests.SampleTable;
 import com.github.labai.opa.Opa.DataType;
 import com.github.labai.opa.Opa.IoDir;
 import com.github.labai.opa.Opa.OpaField;
@@ -9,6 +7,8 @@ import com.github.labai.opa.Opa.OpaParam;
 import com.github.labai.opa.Opa.OpaProc;
 import com.github.labai.opa.Opa.OpaTable;
 import com.progress.open4gl.Rowid;
+import com.github.labai.opa.IntTests.AblIntTestBase;
+import com.github.labai.opa.IntTests.SampleTable;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -19,7 +19,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 
-//@Ignore
 public class I03TableOutTest extends AblIntTestBase{
 
 	@OpaProc(proc = "jpx/test/opa/test_03_table_out.p")
@@ -75,6 +74,8 @@ public class I03TableOutTest extends AblIntTestBase{
 		public Date tmtzVal;
 		@OpaField
 		public Rowid rowid;
+		@OpaField(dataType = DataType.RECID)
+		public Long recid1;
 
 		// non opa field - all field w/o @OpaField
 		public String fake = "not-opa-field";
@@ -93,6 +94,7 @@ public class I03TableOutTest extends AblIntTestBase{
 					+ "|" + (this.tmVal == null ? null : datetimeSdf.format(this.tmVal))
 					+ "|" + (this.tmtzVal == null ? null : datetimetzSdf.format(this.tmtzVal))
 					+ "|" + this.rowid
+					+ "|" + this.recid1
 					;
 		}
 	}
@@ -140,9 +142,9 @@ public class I03TableOutTest extends AblIntTestBase{
 		opp.someId = "00000038";
 		server.runProc(opp);
 
-		String s0 = "Character value|101234|-123456789012|1.23|2014-02-15|true|2014-02-15T00:00:00|2014-02-15T00:00:00.000+0200|null";
-		String s1 = "string|100001|1|1.1|2014-01-15|true|2014-01-15T00:00:00|2014-01-15T00:00:00.000+0200|null";
-		String s2 = "null|null|null|null|null|null|null|null|null";
+		String s0 = "Character value|101234|-123456789012|1.23|2014-02-15|true|2014-02-15T00:00:00|2014-02-15T00:00:00.000+0200|null|100";
+		String s1 = "null|null|null|null|null|null|null|null|null|101";
+		String s2 = "string|100001|1|1.1|2014-01-15|true|2014-01-15T00:00:00|2014-01-15T00:00:00.000+0200|null|102";
 
 		Assert.assertEquals(s0, opp.tt.get(0).toString());
 		Assert.assertEquals(s1, opp.tt.get(1).toString());
@@ -166,11 +168,11 @@ public class I03TableOutTest extends AblIntTestBase{
 
 		List originalList = opp.tt;
 
-		String s0 = "Character value|101234|-123456789012|1.23|2014-02-15|true|2014-02-15T00:00:00|2014-02-15T00:00:00.000+0200|null";
-		String s1 = "string|100001|1|1.1|2014-01-15|true|2014-01-15T00:00:00|2014-01-15T00:00:00.000+0200|null";
-		String s2 = "null|null|null|null|null|null|null|null|null";
+		String s0 = "Character value|101234|-123456789012|1.23|2014-02-15|true|2014-02-15T00:00:00|2014-02-15T00:00:00.000+0200|null|100";
+		String s1 = "null|null|null|null|null|null|null|null|null|101";
+		String s2 = "string|100001|1|1.1|2014-01-15|true|2014-01-15T00:00:00|2014-01-15T00:00:00.000+0200|null|102";
 
-		// for (SampleTable rec: opp.tt) System.out.println(rec);
+		// for (SampleTable rec: opp.ttout) System.out.println(rec);
 
 		Assert.assertEquals(s0, opp.tt.get(0).toString());
 		Assert.assertEquals(s1, opp.tt.get(1).toString());
@@ -199,9 +201,9 @@ public class I03TableOutTest extends AblIntTestBase{
 		opp.someId = "00000038";
 		server.runProc(opp);
 
-		String s0 = "Character value|1234|-123456789012|1.23|2014-02-15|true|2014-02-15T00:00:00|2014-02-15T00:00:00.000+0200|null";
-		String s1 = "string|1|1|1.1|2014-01-15|true|2014-01-15T00:00:00|2014-01-15T00:00:00.000+0200|null";
-		String s2 = "null|0|0|null|null|false|null|null|null";
+		String s0 = "Character value|1234|-123456789012|1.23|2014-02-15|true|2014-02-15T00:00:00|2014-02-15T00:00:00.000+0200|null|100";
+		String s1 = "null|0|0|null|null|false|null|null|null|101";
+		String s2 = "string|1|1|1.1|2014-01-15|true|2014-01-15T00:00:00|2014-01-15T00:00:00.000+0200|null|102";
 
 		Assert.assertEquals(s0, opp.tt.get(0).toString());
 		Assert.assertEquals(s1, opp.tt.get(1).toString());
@@ -226,8 +228,8 @@ public class I03TableOutTest extends AblIntTestBase{
 		server.runProc(opp);
 
 		String s0 = "Character value|1234|AA";
-		String s1 = "string|1|AA";
-		String s2 = "null|null|AA";
+		String s1 = "null|null|AA";
+		String s2 = "string|1|AA";
 
 		Assert.assertEquals(s0, opp.tt.get(0).toString());
 		Assert.assertEquals(s1, opp.tt.get(1).toString());

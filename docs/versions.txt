@@ -1,0 +1,48 @@
+Version history
+
+1.2.5 (2018-04-12)
+- add recid data type for temp-tables
+
+1.2.4 (2018-02-02)
+- fix table field mapping with OpaField name (allowOmitOpaField = true)
+
+1.2.3 (2017-05-26)
+- JavaProxy _release() will be called in separate thread - in some cases _release() may take long time (minutes)
+
+1.2.2 (2017-04-11)
+- connectionTTLSec - by default 298 (less than 300), was unlimited
+
+1.2.1 (2016-12-15)
+- add setter setConnectionTTLSec - connection time-to-live in seconds. Can be useful, if we have load balancer, which drops connections after some fixed period
+
+1.2.0 (2016-09-06)
+- removed setter setSessionModel - sessionModel must be passed by constructor. Now sessionModel will be not global, but for connection.
+
+1.1.0 (2015-10-20)
+- use apache commons-pool2 for pool instead of proxy-tools
+- progress library dependency scope is "provided"
+- setters
+
+1.0.8 (2015-09-01)
+- @OpaField is optional (if flag allowOmitOpaField is true)
+
+1.0.7 (2015-08-14)
+- BLOB, CLOB
+
+1.0.4 (2015-02-17)
+- OpaProc proc is optional
+
+1.0.3 (2015-02-06)
+- procedure name can be passed as parameter to runProc
+- pool size and timeout can be configured (setMaxPoolSize, setConnectionTimeout)
+
+1.0.2 (2014-12-23)
+- enum as field type
+- column name can be different from entity field (@OpaField(name))
+- log warnings when fields not found (either in entity, either in temp-table)
+- allow private classes and fields
+- if list for entity is not null - use it, else create ArrayList
+
+1.0.0 (2014-11-18)
+- first release in production
+

@@ -13,12 +13,6 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-/*
- * Tests require an OpenEdge AppServer (see url in TestParams)
- * and test .p procedures placed into propath under:
- *      jpx/test/opa/*
- *      (see test/resources/pcode/*)
- */
 public class IntTests {
 
 	public static class AblIntTestBase {
@@ -27,7 +21,7 @@ public class IntTests {
 
 		@Before
 		public void init() {
-			Assume.assumeTrue("Is integration tests enabled?", TestParams.INT_TESTS_ENABLED);
+			Assume.assumeTrue("Is integrations test enabled?", TestParams.INT_TESTS_ENABLED);
 			server = new OpaServer(TestParams.APP_SERVER, TestParams.APP_USER, TestParams.APP_USER, SessionModel.STATE_FREE);
 		}
 
@@ -42,7 +36,8 @@ public class IntTests {
 	 */
 	@OpaTable(allowOmitOpaField = true)
 	static class SampleTable implements Cloneable {
-		public String charVal;
+		@OpaField(name = "charVal")
+		public String charValx;
 		private Integer intVal;
 		public Long int64Val;
 		public BigDecimal decVal;
@@ -54,6 +49,8 @@ public class IntTests {
 		@OpaField(dataType = DataType.DATETIMETZ)
 		public Date tmtzVal;
 		public Rowid rowid;
+		@OpaField(dataType = DataType.RECID)
+		public Long recid1;
 
 		// non opa field - must be declared with @OpaTransient
 		@OpaTransient
@@ -79,7 +76,7 @@ public class IntTests {
 			SimpleDateFormat dateSdf = new SimpleDateFormat("yyyy-MM-dd");
 			SimpleDateFormat datetimeSdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 			SimpleDateFormat datetimetzSdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-			return this.charVal
+			return this.charValx
 					+ "|" + this.intVal
 					+ "|" + this.int64Val
 					+ "|" + this.decVal
@@ -88,6 +85,7 @@ public class IntTests {
 					+ "|" + (this.tmVal == null ? null : datetimeSdf.format(this.tmVal))
 					+ "|" + (this.tmtzVal == null ? null : datetimetzSdf.format(this.tmtzVal))
 					+ "|" + this.rowid
+					+ "|" + this.recid1
 					;
 		}
 
@@ -95,5 +93,7 @@ public class IntTests {
 			return (SampleTable)super.clone();
 		}
 	}
+
+
 
 }

@@ -11,12 +11,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by Augustus on 2015.06.19.
  */
-//@Ignore
 public class I07BlobTest extends AblIntTestBase {
 
 	@OpaTable
@@ -26,6 +26,7 @@ public class I07BlobTest extends AblIntTestBase {
 
 		@OpaField(dataType = DataType.BLOB)
 		public byte[] blob1;
+
 		@OpaField(dataType = DataType.CLOB)
 		public String clob1;
 
@@ -41,11 +42,20 @@ public class I07BlobTest extends AblIntTestBase {
 		@OpaParam
 		public String charValIn;
 
+		@OpaParam(dataType = DataType.LONGCHAR)
+		public String longCharValIn;
+
 		@OpaParam(dataType = DataType.MEMPTR)
-		public byte[] dataIn;
+		public byte[] mmptrIn;
+
+		@OpaParam(table = SampleTableWithBlob.class, io = IoDir.IN)
+		public List<SampleTableWithBlob> ttin;
 
 		@OpaParam(table = SampleTableWithBlob.class, io = IoDir.OUT)
-		public List<SampleTableWithBlob> tt;
+		public List<SampleTableWithBlob> ttout;
+
+		@OpaParam(dataType = DataType.LONGCHAR, io = IoDir.OUT)
+		public String longCharValOut;
 
 		@OpaParam(dataType = DataType.MEMPTR, io = IoDir.OUT)
 		public byte[] dataOut;
@@ -59,22 +69,66 @@ public class I07BlobTest extends AblIntTestBase {
 	public void testTableOutBlob() throws OpaException, UnsupportedEncodingException {
 
 		TableOutBlobOpp opp = new TableOutBlobOpp();
-		opp.dataIn = "data-in".getBytes();
+		opp.mmptrIn = "data-in".getBytes();
+		opp.charValIn = "charValIn";
+		opp.longCharValIn = "longCharValIn";
+
+		SampleTableWithBlob ttrec = new SampleTableWithBlob();
+		ttrec.blob1 = "blobin".getBytes();
+		ttrec.clob1 = "clobin";
+
+		opp.ttin = new ArrayList<SampleTableWithBlob>();
+		opp.ttin.add(ttrec);
+
 		server.runProc(opp);
 
-		SampleTableWithBlob row = opp.tt.get(0);
+		SampleTableWithBlob row = opp.ttout.get(0);
+		Assert.assertEquals("blobin", new String(row.blob1, "UTF-8"));
+		Assert.assertEquals("clobin", row.clob1);
 
+		row = opp.ttout.get(1);
 		Assert.assertEquals("Blob value", new String(row.blob1, "UTF-8"));
 		Assert.assertEquals("Clob value", row.clob1);
 
-		row = opp.tt.get(1);
+		row = opp.ttout.get(2);
 
 		Assert.assertEquals(null, row.blob1);
 		Assert.assertEquals(null, row.clob1);
 
-		Assert.assertEquals("Memptr value from: data-in", new String(opp.dataOut));
+		Assert.assertEquals("data-in", new String(opp.dataOut));
+		Assert.assertEquals("longCharValIn-out", opp.longCharValOut);
 
 		//log("TableOut ok");
 	}
 
+
+	/**
+	 * Test output table with blobs
+	 */
+	@Test
+	public void testTableOutBlobNulls() throws OpaException, UnsupportedEncodingException {
+
+		TableOutBlobOpp opp = new TableOutBlobOpp();
+		opp.mmptrIn = null;
+		opp.longCharValIn = null;
+
+		SampleTableWithBlob ttrec = new SampleTableWithBlob();
+		ttrec.blob1 = null;
+		ttrec.clob1 = null;
+
+		opp.ttin = new ArrayList<SampleTableWithBlob>();
+		opp.ttin.add(ttrec);
+
+		server.runProc(opp);
+
+		SampleTableWithBlob row = opp.ttout.get(0);
+		Assert.assertEquals(null, row.blob1);
+		Assert.assertEquals(null, row.clob1);
+
+		// WARNING: memptr is not null
+		Assert.assertArrayEquals(new byte[]{}, opp.dataOut);
+		Assert.assertEquals(null, opp.longCharValOut);
+
+		//log("TableOut ok");
+	}
 }

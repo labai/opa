@@ -15,7 +15,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
-//@Ignore
 public class I02SimpleParamsTest extends AblIntTestBase {
 
 	@OpaProc(proc="jpx/test/opa/test_02_simple_params.p")

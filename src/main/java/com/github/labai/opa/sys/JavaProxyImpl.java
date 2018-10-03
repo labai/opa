@@ -1,14 +1,20 @@
 package com.github.labai.opa.sys;
 
+import com.github.labai.opa.sys.Exceptions.OpaSessionTimeoutException;
+import com.github.labai.opa.sys.Exceptions.OpaStructureException;
 import com.progress.common.ehnlog.IAppLogger;
 import com.progress.open4gl.ConnectException;
 import com.progress.open4gl.Open4GLException;
 import com.progress.open4gl.ResultSetHolder;
 import com.progress.open4gl.SystemErrorException;
-import com.progress.open4gl.dynamicapi.*;
+import com.progress.open4gl.dynamicapi.IPoolProps;
+import com.progress.open4gl.dynamicapi.MetaSchema;
+import com.progress.open4gl.dynamicapi.ParameterSet;
+import com.progress.open4gl.dynamicapi.ResultSet;
+import com.progress.open4gl.dynamicapi.RqContext;
 import com.progress.open4gl.javaproxy.AppObject;
-import com.github.labai.opa.sys.Exceptions.OpaSessionTimeoutException;
-import com.github.labai.opa.sys.Exceptions.OpaStructureException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.sql.SQLException;
@@ -20,6 +26,7 @@ import java.util.Map;
  * @author Augustus
  */
 class JavaProxyImpl extends AppObject {
+	private final static Logger logger = LoggerFactory.getLogger(JavaProxyImpl.class);
 
 	public JavaProxyImpl(String s, IPoolProps ipoolprops, IAppLogger iapplogger) throws Open4GLException, ConnectException, SystemErrorException {
 		super(s, ipoolprops, iapplogger, null);
@@ -51,12 +58,17 @@ class JavaProxyImpl extends AppObject {
 				throw new OpaStructureException("OpenEdge procedure name must be provided");
 		}
 
+		long startTs = System.currentTimeMillis();
+
 		RqContext rqcontext = null;
 		if (metaschema != null) {
 			rqcontext = runProcedure(procName, paramSet, metaschema);
 		} else {
 			rqcontext = runProcedure(procName, paramSet);
 		}
+
+		if (System.currentTimeMillis() - startTs > 5000)
+			logger.debug("Opa call to proc '{}' took {}ms", procName, System.currentTimeMillis() - startTs);
 
 		// assign results (ordinary params) to bean; return rsmap - list of resultSets, which will be filled later
 		//

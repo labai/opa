@@ -42,9 +42,14 @@ public class OpaServer {
 		appServer.setMaxPoolSize(maxConnections);
 	}
 
-	/** Set connection timeout in milliseconds. Default is 30 s */
+	/** Set new connection create timeout in milliseconds. Default is 30 s. */
 	public void setConnectionTimeout(long timeoutMs) {
 		appServer.setConnectionTimeout(timeoutMs);
+	}
+
+	/** Set connection time-to-live in seconds. Default is 298s (4:58) */
+	public void setConnectionTTLSec(int ttlInSec) {
+		appServer.setConnectionTTLSec(ttlInSec);
 	}
 
 }
