@@ -1,6 +1,5 @@
 # OPA - Openedge Procedure Adapter
 
-
 ----
 ## ABOUT
 
@@ -8,22 +7,22 @@ OPA is adapter for OpenEdge ABL (Progress 4GL) procedure call from Java.
 
 #### Problem to solve
 
-For calling procedures from Java, Progress offers to use ProxyGen. It requires few steps:
+To call procedures from Java, Progress offers to use ProxyGen. It requires few steps:
 
 1. To have prepared ProxyGen project.
-2. Compile .p code to .r code.
+2. Compile .p code into .r code.
 3. Move these .r code to some place where ProxyGen project will see them.
 4. Generate ugly java classes.
 5. Move these classes to your Java project.
 
-If procedure parameters (input/output parameters, temp-table) have changed, then you need to do all steps again.
+If procedure parameters (input/output parameters, temp-table) is changed, then it require to repeat all steps again.
 
 #### Solution
 
 OPA offers flexible and easy way to call of OpenEdge procedures with runtime parameter mapping.
 
 OPA uses dedicated class with Java annotations to describe parameters and temp-table fields (Java list of entities). 
-When you need to call OpenEdge ABL procedure, you create instance of that class, assign values to input parameters, fill List (temp-table) and call OpenEdge procedure.
+When need to call OpenEdge ABL procedure, just create instance of that class, assign values to input parameters, fill List (temp-table) and call OpenEdge procedure.
 OPA automatically (on the fly) maps input parameters from Java class to OpenEdge procedure, calls that procedure and fills output parameters with procedure result.
 
 ----
@@ -38,15 +37,15 @@ It is required to add dependency in pom.xml, to use OPA:
 </dependency>
 ```
 Also `o4glrt.jar` from OpenEdge install dir must be accessible. 
-I recommend to add it as artifact into you maven repository and use as dependency in pom.xml
+It is good idea to add this jar as artifact into maven repository and use as dependency in pom.xml.
 
 ---
 ## MORE INFO
 
 - It is free.
-- Has been used in production since 2014.
-- Support connection pool.
-- Support wide range of types, used in Java and Progress.
+- Is in production since 2014.
+- Supports connection pool.
+- Supports wide range of types, used in Java and Progress.
 - Temp-table can be automatically mapped to List.
 
 ----
@@ -67,26 +66,26 @@ public class OpaDemo {
     @OpaProc(proc="get_bank_by_code.p")
     private static class BankCodeOpp {
 
-        @OpaParam(io=IoDir.IN)
+        @OpaParam(io=IN)
         public String bankCode;
 
-        @OpaParam(io=IoDir.OUT)
+        @OpaParam(io=OUT)
         public String bankName;
 
-        @OpaParam(io=IoDir.OUT)
+        @OpaParam(io=OUT)
         public Integer errorCode;
 
-        @OpaParam(io= IoDir.OUT)
+        @OpaParam(io=OUT)
         public String errorMessage;
     }
 }
 ```
 OpenEdge procedure parameters:
 ```
-define input  parameter bankCode as character initial ?.  
-define output parameter bankName as character initial ?.  
-define output parameter err_code as integer   initial ?.  
-define output parameter err      as character initial ?.  
+define input  parameter bankCode     as character initial ?.  
+define output parameter bankName     as character initial ?.  
+define output parameter errorCode    as integer   initial ?.  
+define output parameter errorMessage as character initial ?.  
 ```
 
 #### Sample 2: with output temp-table
@@ -98,10 +97,10 @@ public class OpaDemo2 {
         OpaServer server = new OpaServer("AppServer://progress.app.server/asprosv", "-", "-", SessionModel.STATE_FREE);
 
         GetCustomerAccountsOpp opp = new GetCustomerAccountsOpp();
-        opp.customerId = "00000038";
+        opp.customerId = "123456";
         server.runProc(opp, "get_customer_accounts.p");
         for (Account ac: opp.accounts) {
-            System.out.println("acc:" + ac.iban +"-"+ ac.currency);
+            System.out.println("acc: " + ac.iban + "-" + ac.currency);
         }
     }
 
@@ -135,5 +134,4 @@ public class OpaDemo2 {
 }
 ```
 
-More samples can be found in OPA tests
-https://github.com/labai/opa/tree/master/src/test/java/com/github/labai/opa
+More samples can be found in OPA tests (https://github.com/labai/opa/tree/master/src/test/java/com/github/labai/opa)
