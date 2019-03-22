@@ -15,11 +15,12 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-/*
+/**
+ * @author Augustus
+ *         created on 2015.10.13
+ *
  * For internal usage only (is not part of api)
  *
- * @author Augustus Mickus
- *         created on 2015.10.13
  */
 class Pool {
 	private final static Logger logger = LoggerFactory.getLogger(Pool.class);
@@ -33,7 +34,7 @@ class Pool {
 		int connectionTTLSec = 298; // 4:58
 
 
-		public ConnParams(String urlString, String userId, String password, SessionModel sessionModel) {
+		ConnParams(String urlString, String userId, String password, SessionModel sessionModel) {
 			this.password = password;
 			this.userId = userId;
 			this.urlString = urlString;
@@ -49,14 +50,14 @@ class Pool {
 	/**
 	 * connection pool
 	 */
-	public static class JpxConnPool extends GenericObjectPool<JavaProxyAgent> {
+	static class JpxConnPool extends GenericObjectPool<JavaProxyAgent> {
 
-		public JpxConnPool(ConnParams connParams, GenericObjectPoolConfig poolConfig) {
+		JpxConnPool(ConnParams connParams, GenericObjectPoolConfig poolConfig) {
 			super(new JpxConnFactory(connParams), poolConfig);
 			this.setTestOnBorrow(true);
 		}
 
-		public void setConnectionTTLSec(int connectionTTLSec) {
+		void setConnectionTTLSec(int connectionTTLSec) {
 			ConnParams connParams = ((JpxConnFactory)super.getFactory()).connParams;
 			connParams.connectionTTLSec = connectionTTLSec;
 		}
@@ -86,23 +87,18 @@ class Pool {
 
 		@Override
 		public void destroyObject(final PooledObject<JavaProxyAgent> pooledObj) throws Exception {
-			zombieKiller.submit(new Runnable() {
-				@Override
-				public void run() {
-					long startTs = System.currentTimeMillis();
-					try {
-						pooledObj.getObject()._release();
-					} catch (Open4GLException e) {
-						logger.info("Open4GLException while JavaProxyAgent _release:" + e.getMessage());
-						logger.debug("Exception", e);
-						// ignore
-					} finally {
-						if (System.currentTimeMillis() - startTs > 1000) {
-							logger.info("JavaProxyAgent _release() took {}ms", System.currentTimeMillis() - startTs);
-						}
+			zombieKiller.submit(() -> {
+				long startTs = System.currentTimeMillis();
+				try {
+					pooledObj.getObject()._release();
+				} catch (Open4GLException e) {
+					logger.info("Open4GLException while JavaProxyAgent _release:" + e.getMessage());
+					logger.debug("Exception", e);
+					// ignore
+				} finally {
+					if (System.currentTimeMillis() - startTs > 1000) {
+						logger.info("JavaProxyAgent _release() took {}ms", System.currentTimeMillis() - startTs);
 					}
-
-
 				}
 			});
 		}
@@ -130,7 +126,7 @@ class Pool {
 		};
 		ThreadPoolExecutor executor = new ThreadPoolExecutor(workerCount, workerCount,
 				0, TimeUnit.SECONDS,
-				new LinkedBlockingQueue<Runnable>(queueSize), threadFactory);
+				new LinkedBlockingQueue<>(queueSize), threadFactory);
 		return executor;
 	}
 

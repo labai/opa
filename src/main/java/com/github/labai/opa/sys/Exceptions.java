@@ -3,9 +3,10 @@ package com.github.labai.opa.sys;
 import com.github.labai.opa.OpaException;
 
 /**
+ * @author Augustus
+ *
  * For internal usage only (is not part of api)
  *
- * @author Augustus
  */
 class Exceptions {
 
@@ -13,7 +14,7 @@ class Exceptions {
 	 * Session timeout.
 	 */
 	static class OpaSessionTimeoutException extends OpaException {
-		public OpaSessionTimeoutException() {
+		OpaSessionTimeoutException() {
 			super("Session timeout");
 		}
 	}
@@ -25,13 +26,10 @@ class Exceptions {
 		private static final long serialVersionUID = 1L;
 		public OpaStructureException() {
 		}
-		public OpaStructureException(String message) {
+		OpaStructureException(String message) {
 			super(message);
 		}
-		public OpaStructureException(Throwable cause) {
-			super(cause);
-		}
-		public OpaStructureException(String message, Throwable cause) {
+		OpaStructureException(String message, Throwable cause) {
 			super(message, cause);
 		}
 	}

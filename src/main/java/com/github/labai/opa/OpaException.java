@@ -3,7 +3,7 @@ package com.github.labai.opa;
 /**
  * @author Augustus
  */
-public class OpaException extends Exception {
+public class OpaException extends RuntimeException {
 
 	public OpaException() {
 	}

@@ -1,6 +1,5 @@
 package com.github.labai.opa;
 
-import com.github.labai.opa.IntTests.AblIntTestBase;
 import com.github.labai.opa.Opa.DataType;
 import com.github.labai.opa.Opa.IoDir;
 import com.github.labai.opa.Opa.OpaField;
@@ -17,7 +16,7 @@ import java.util.List;
 /**
  * Created by Augustus on 2015.06.19.
  */
-public class I07BlobTest extends AblIntTestBase {
+public class I07BlobTest extends IntTestBase {
 
 	@OpaTable
 	static class SampleTableWithBlob {

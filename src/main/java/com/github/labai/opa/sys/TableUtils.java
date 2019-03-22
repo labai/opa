@@ -29,9 +29,9 @@ import java.sql.Clob;
 import java.sql.NClob;
 import java.sql.RowId;
 import java.sql.SQLException;
+import java.sql.SQLType;
 import java.sql.SQLXML;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -40,16 +40,55 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * @author Augustus
+ *
+ * various functions to work with OPA procedures parameter with temp-table type (ResultSet in Java)
+ *
  * For internal usage only (is not part of api)
  *
- * @author Augustus
  */
-public class TableUtils {
-	final static Logger logger = LoggerFactory.getLogger(Opa.class);
+class TableUtils {
+	private final static Logger logger = LoggerFactory.getLogger(Opa.class);
+
+
+	static class ColDef<T> {
+		final Field field;
+		final DataType ablType;
+		final Class<?> type;
+		final Method setter;
+		ColDef(Field field, Class<T> clazz, boolean ignoreSetters) throws OpaStructureException {
+			this.field = field;
+			this.type = field.getType();
+			this.ablType = guessAblType(field);
+			if (!ignoreSetters) {
+				this.setter = getSetter(field, clazz);
+				if (this.setter != null)
+					this.setter.setAccessible(true); // if not set, then class expecting to be public also
+			} else {
+				this.setter = null;
+			}
+		}
+
+		void setValue(Object bean, Object value) throws IllegalAccessException, InvocationTargetException {
+			if (setter != null)
+				setter.invoke(bean, value);
+			else if (field != null)
+				field.set(bean, value);
+		}
+
+		private static Method getSetter(Field field, Class<?> clazz) {
+			try {
+				String nm = field.getName();
+				return clazz.getMethod("set" + nm.substring(0, 1).toUpperCase() + nm.substring(1), field.getType());
+			} catch (SecurityException | NoSuchMethodException e) {
+				return null; // will ignore if can't access
+			}
+		}
+	}
 
 	/**
 	 *  a) if field in opp field list is provided, then fill it, otherwise (if null) - create ArrayList;
-	 *  b) if provided list is not empty - throw exception (TODO: use flag APPEND)
+	 *  b) if provided list is not empty - throw exception
 	 *
 	 */
 	static void copyAllRecordSetsToBean (Map<Field, ResultSetHolder> rsmap, Object opp) throws OpaStructureException, SQLException {
@@ -77,47 +116,45 @@ public class TableUtils {
 		}
 	}
 
-	private static class ColDef<T> {
-		Field field;
-		DataType declaredType;
-		Class<?> type;
-		Method setter;
-		ColDef(Field field, Class<T> clazz, boolean ignoreSetters){
-			this.field = field;
-			this.type = field.getType();
-			this.declaredType = declaredDataType(field);
-			if (!ignoreSetters) {
-				this.setter = getSetter(field, clazz);
-				if (this.setter != null)
-					this.setter.setAccessible(true); // if not set, then class expecting to be public also
-			}
-		}
-		void setValue(Object bean, Object value) throws IllegalAccessException, InvocationTargetException {
-			if (setter != null)
-				setter.invoke(bean, value);
-			else if (field != null)
-				field.set(bean, value);
-		};
-		private static Method getSetter(Field field, Class<?> clazz) {
-			try {
-				String nm = field.getName();
-				return clazz.getMethod("set" + nm.substring(0, 1).toUpperCase() + nm.substring(1), field.getType());
-			} catch (SecurityException e) {
-				return null; // will ignore if can't access
-			} catch (NoSuchMethodException ignoreMe) {
-				return null;
-			}
-		}
-	}
-
 	private static <T> void resultSetToList (Class<T> clazz, ResultSet resultSet, List<T> listToFill) throws SQLException, OpaStructureException {
 		assert listToFill != null : "listToFill must be not null";
 
+		Map<String, ColDef<T>> columnDefs = getColDefs(clazz, resultSet);
+
+		// iterate through rows and create bean
+		while (resultSet.next()) {
+			T bean;
+			try {
+				Constructor<T> constructor = clazz.getDeclaredConstructor();
+				constructor.setAccessible(true);
+				bean = constructor.newInstance();
+			} catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException | InstantiationException e) {
+				throw new OpaStructureException("Error while creating object instance", e);
+			}
+
+			for (String columnName : columnDefs.keySet()) {
+				ColDef colDef = columnDefs.get(columnName);
+				if (colDef == null) {
+					resultSet.getObject(columnName);
+					continue;
+				}
+				try {
+					assignColumnToField(resultSet, colDef, bean, columnName);
+				} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
+					throw new OpaStructureException("Error while assigning value to field '"+ colDef.field.getName() +"'", e);
+				}
+			}
+			listToFill.add(bean);
+		}
+		return;
+	}
+
+	private static <T> Map<String, ColDef<T>> getColDefs(Class<T> clazz, ResultSet resultSet) throws SQLException {
 		boolean allowOmitOpaField = clazz.getAnnotation(OpaTable.class).allowOmitOpaField();
 		boolean ignoreSetters = false; // leave for future implementations...
 
 		// Java entity field name map (name -> javaField)
-		Map<String, Field> entityFields = new LinkedHashMap<String, Field>();
+		Map<String, Field> entityFields = new LinkedHashMap<>();
 		for (Field field : clazz.getDeclaredFields()) {
 			field.setAccessible(true);
 			String name = getOpaName(field, allowOmitOpaField);
@@ -127,8 +164,8 @@ public class TableUtils {
 		}
 
 		// read OE columns -> field (read from metadata)
-		Map<String, ColDef<T>> columnNames = new LinkedHashMap<String, ColDef<T>>();
-		Set<Field> foundInOE = new HashSet<Field>();
+		Map<String, ColDef<T>> columnNames = new LinkedHashMap<>();
+		Set<Field> foundInOE = new HashSet<>();
 		int count;
 		count = resultSet.getMetaData().getColumnCount();
 		for (int i = 1; i <= count; i++) {
@@ -138,158 +175,118 @@ public class TableUtils {
 				logger.warn("Column '{}' from resultSet (OE temp-table) was not found in entity '{}'", colName, clazz.getName());
 			else {
 				foundInOE.add(f);
-				columnNames.put(colName, new ColDef<T>(f, clazz, ignoreSetters));
+				columnNames.put(colName, new ColDef<>(f, clazz, ignoreSetters));
 			}
 		}
 		for (Field f : entityFields.values()) {
 			if (! foundInOE.contains(f))
-				logger.warn("Field '{}' of '{}' was not found in resultSet (OE temp-table)", f.getName(), clazz.getName());
+				logger.warn("Field '{}' (name={}) of '{}' was not found in resultSet (OE temp-table)", f.getName(), getOpaName(f, allowOmitOpaField), clazz.getName());
 		}
 
-		// iterate throw rows and create bean
-		String s;
-		while (resultSet.next()) {
-			T bean;
-			try {
-				Constructor<T> constructor = null;
-				constructor = clazz.getDeclaredConstructor();
-				constructor.setAccessible(true);
-				bean = constructor.newInstance();
-			} catch (NoSuchMethodException e) {
-				throw new OpaStructureException("Error while creating object instance", e);
-			} catch (InvocationTargetException e) {
-				throw new OpaStructureException("Error while creating object instance", e);
-			} catch (InstantiationException e) {
-				throw new OpaStructureException("Error while creating object instance", e);
-			} catch (IllegalAccessException e) {
-				throw new OpaStructureException("Error while creating object instance", e);
-			}
+		return columnNames;
+	}
 
-			for (String columnName : columnNames.keySet()) {
-				ColDef colDef = columnNames.get(columnName);
-				if (colDef == null) {
-					resultSet.getObject(columnName);
-					continue;
-				}
-				try {
-					Class<?> type = colDef.type;
-					if (type == long.class) {
-						s = resultSet.getString(columnName);
-						colDef.setValue(bean, s == null ? 0 : Long.parseLong(s)); // auto convert null to 0
-					} else if (type.isAssignableFrom(Long.class)) {
-						s = resultSet.getString(columnName);
-						colDef.setValue(bean, s == null ? null : Long.parseLong(s));
-						//colDef.setValue(bean, resultSet.getLong(columnName));
-					} else if (type == int.class) {
-						s = resultSet.getString(columnName);
-						colDef.setValue(bean, s == null ? 0 : Integer.parseInt(s)); // auto convert null to 0
-						//colDef.setValue(bean, resultSet.getInt(columnName));
-					} else if (type.isAssignableFrom(Integer.class)) {
-						s = resultSet.getString(columnName);
-						colDef.setValue(bean, s == null ? null : Integer.parseInt(s));
-					} else if (type == boolean.class) {
-						s = resultSet.getString(columnName);
-						colDef.setValue(bean, s == null ? false : Boolean.parseBoolean(s)); // auto convert null to false
-					} else if (type.isAssignableFrom(Boolean.class)) {
-						s = resultSet.getString(columnName);
-						colDef.setValue(bean, s == null ? null : Boolean.parseBoolean(s));
-					} else if (type.isAssignableFrom(BigDecimal.class)) {
-						s = resultSet.getString(columnName);
-						colDef.setValue(bean, s == null ? null : new BigDecimal(s));
-					} else if (type.isAssignableFrom(String.class)) {
-						switch(colDef.declaredType) {
-							case CLOB:
-								Clob clob = resultSet.getClob(columnName);
-								colDef.setValue(bean, clob == null ? null : clob.getSubString(1, (int) clob.length())); // int - max 2GB
-								break;
-							default:
-								colDef.setValue(bean, resultSet.getString(columnName));
-						}
-					} else if (type.isAssignableFrom(Date.class)) {
-						switch(colDef.declaredType){
-							case DATETIMETZ:
-								GregorianCalendar cal = resultSet.getGregorianCalendar(columnName);
-								colDef.setValue(bean, cal == null ? null : cal.getTime());
-								break;
-							case DATE:
-								colDef.setValue(bean, toJavaDate(resultSet.getDate(columnName)));
-								break;
-							default:// DATETIME: // default - datetime
-								cal = resultSet.getGregorianCalendar(columnName);
-								colDef.setValue(bean, cal == null ? null : cal.getTime());
-						}
-					} else if (type.isEnum()) {
-						String sval = resultSet.getString(columnName);
-						if (sval == null || "".equals(sval))
-							colDef.setValue(bean, null);
-						else
-							colDef.setValue(bean, Enum.valueOf((Class<Enum>) type, sval));
-					//} else if (type.isAssignableFrom(byte.class) && type.isArray()) {
-					} else if (type.getSimpleName().equals("byte[]")) {
-						switch(colDef.declaredType) {
-							case BLOB:
-								Blob blob = resultSet.getBlob(columnName);
-								if (blob != null) {
-									byte[] data = blob.getBytes(1, (int)blob.length()); // int - max 2GB
-									colDef.setValue(bean, data);
-								} else {
-									colDef.setValue(bean, null);
-								}
-								break;
-							default: // RAW?
-								throw new OpaStructureException("DataType.BLOB is required in OpaField annotation for 'byte[]' field '"+ colDef.field.getName() +"'");
-						}
-					} else { // clear
-						//resultSet.getObject(columnName);
+	private static <T> void assignColumnToField(ResultSet resultSet, ColDef colDef, T bean, String columnName) throws SQLException, InvocationTargetException, IllegalAccessException {
+		Class<?> type = colDef.type;
+		if (type == long.class) {
+			String s = resultSet.getString(columnName);
+			colDef.setValue(bean, s == null ? 0 : Long.parseLong(s)); // auto convert null to 0
+			return;
+		}
+		if (Long.class.isAssignableFrom(type)) {
+			String s = resultSet.getString(columnName);
+			colDef.setValue(bean, s == null ? null : Long.parseLong(s));
+			//colDef.setValue(bean, resultSet.getLong(columnName));
+			return;
+		}
+		if (type == int.class) {
+			String s = resultSet.getString(columnName);
+			colDef.setValue(bean, s == null ? 0 : Integer.parseInt(s)); // auto convert null to 0
+			//colDef.setValue(bean, resultSet.getInt(columnName));
+			return;
+		}
+		if (Integer.class.isAssignableFrom(type)) {
+			String s = resultSet.getString(columnName);
+			colDef.setValue(bean, s == null ? null : Integer.parseInt(s));
+			return;
+		}
+		if (type == boolean.class) {
+			String s = resultSet.getString(columnName);
+			colDef.setValue(bean, s == null ? false : Boolean.parseBoolean(s)); // auto convert null to false
+			return;
+		}
+		if (Boolean.class.isAssignableFrom(type)) {
+			String s = resultSet.getString(columnName);
+			colDef.setValue(bean, s == null ? null : Boolean.parseBoolean(s));
+			return;
+		}
+		if (BigDecimal.class.isAssignableFrom(type)) {
+			String s = resultSet.getString(columnName);
+			colDef.setValue(bean, s == null ? null : new BigDecimal(s));
+			return;
+		}
+		if (String.class.isAssignableFrom(type)) {
+			switch(colDef.ablType) {
+				case CLOB:
+					Clob clob = resultSet.getClob(columnName);
+					colDef.setValue(bean, clob == null ? null : clob.getSubString(1, (int) clob.length())); // int - max 2GB
+					break;
+				default:
+					colDef.setValue(bean, resultSet.getString(columnName));
+			}
+			return;
+		}
+		if (DateConv.isTypeOfDate(type)) {
+			switch(colDef.ablType){
+				case DATETIMETZ:
+					GregorianCalendar cal = resultSet.getGregorianCalendar(columnName);
+					DateConv.readProDateTimeTz(colDef, bean, cal);
+					break;
+				case DATE:
+					DateConv.readProDate(colDef, bean, resultSet.getDate(columnName));
+					break;
+				default:// DATETIME: // default - datetime
+					cal = resultSet.getGregorianCalendar(columnName);
+					DateConv.readProDateTime(colDef, bean, cal);
+			}
+			return;
+		}
+		if (type.isEnum()) {
+			String sval = resultSet.getString(columnName);
+			if (sval == null || "".equals(sval))
+				colDef.setValue(bean, null);
+			else
+				colDef.setValue(bean, Enum.valueOf((Class<Enum>) type, sval));
+			//} else if (type == byte.class && type.isArray()) {
+			return;
+		}
+		if (type.getSimpleName().equals("byte[]")) {
+			switch(colDef.ablType) {
+				case BLOB:
+					Blob blob = resultSet.getBlob(columnName);
+					if (blob != null) {
+						byte[] data = blob.getBytes(1, (int)blob.length()); // int - max 2GB
+						colDef.setValue(bean, data);
+					} else {
+						colDef.setValue(bean, null);
 					}
-				} catch (IllegalArgumentException e) {
-					throw new OpaStructureException("Error while assigning value to field '"+ colDef.field.getName() +"'", e);
-				} catch (IllegalAccessException e) {
-					throw new OpaStructureException("Error while assigning value to field '"+ colDef.field.getName() +"'", e);
-				} catch (InvocationTargetException e) {
-					throw new OpaStructureException("Error while assigning value to field '"+ colDef.field.getName() +"'", e);
-				}
+					break;
+				default: // RAW?
+					throw new OpaStructureException("DataType.BLOB is required in OpaField annotation for 'byte[]' field '"+ colDef.field.getName() +"'");
 			}
-			listToFill.add(bean);
+			return;
 		}
+		// clear
+		//resultSet.getObject(columnName);
 		return;
 	}
 
-	private static List<Object> beanToList (Object bean) throws IllegalArgumentException, IllegalAccessException {
-		List<Object> row = new ArrayList<Object>();
-		Class<?> clazz = bean.getClass();
-		boolean allowOmitOpaField = clazz.getAnnotation(OpaTable.class).allowOmitOpaField();
-
-		for (Field field : clazz.getDeclaredFields()) {
-			field.setAccessible(true);
-			if (getOpaName(field, allowOmitOpaField) == null)
-				continue;
-			Class<?> type = field.getType();
-			if (type.isAssignableFrom(Date.class)) {
-				if (field.get(bean) == null) {
-					row.add(null);
-				} else {
-					GregorianCalendar cal = new GregorianCalendar();
-					cal.setTime((Date)field.get(bean));
-					row.add(cal);
-				}
-			} else if (type.isEnum()) { // enum as char
-				String sval = field.get(bean).toString();
-				row.add(sval);
-			} else {
-				row.add(field.get(bean)); // other types - as is
-			}
-		}
-		return row;
-	}
-
-
 	static java.sql.ResultSet listToResultSet (List<?> rowList, Class<?> clazz) {
-		return (java.sql.ResultSet) new OpaInputResultSet(rowList, clazz);
+		return new OpaInputResultSet(rowList, clazz);
 	}
 
 
-	static ResultSetMetaData extractMetaData (Class<?> clazz) throws OpaStructureException {
+	private static ResultSetMetaData extractMetaData(Class<?> clazz) throws OpaStructureException {
 		boolean allowOmitOpaField = clazz.getAnnotation(OpaTable.class).allowOmitOpaField();
 
 		// get count
@@ -310,7 +307,7 @@ public class TableUtils {
 			if (name == null)
 				continue;
 			iPos++;
-			metaData.setFieldDesc(iPos, name, 0, ablType(field).progressId);
+			metaData.setFieldDesc(iPos, name, 0, guessAblType(field).progressId);
 		}
 
 		return metaData;
@@ -350,40 +347,34 @@ public class TableUtils {
 		return DataType.AUTO;
 	}
 
-	private static DataType ablType (Field field) throws OpaStructureException {
+	private static DataType guessAblType(Field field) throws OpaStructureException {
 		Class<?> type = field.getType();
-		if (type.isAssignableFrom(Long.class) || type == long.class) {
+		if (Long.class.isAssignableFrom(type) || type == long.class) {
 			DataType datatype = declaredDataType(field);
 			if (datatype == DataType.RECID)
 				return datatype;
 			return DataType.INT64;
-		} else if (type.isAssignableFrom(Integer.class) || type == int.class) {
+		} else if (Integer.class.isAssignableFrom(type) || type == int.class) {
 			return DataType.INTEGER;
-		} else if (type.isAssignableFrom(String.class)) {
+		} else if (String.class.isAssignableFrom(type)) {
 			DataType datatype = declaredDataType(field);
 			switch(datatype) {
 				case CLOB: return DataType.CLOB;
 				default: return DataType.CHARACTER;
 			}
-		} else if (type.isAssignableFrom(BigDecimal.class)) {
+		} else if (BigDecimal.class.isAssignableFrom(type)) {
 			return DataType.DECIMAL;
-		} else if (type.isAssignableFrom(Date.class)) {
-			DataType datatype = declaredDataType(field);
-			switch(datatype){
-				case DATETIMETZ: return DataType.DATETIMETZ;
-				case DATETIME: return DataType.DATETIME;
-				case DATE: return DataType.DATE;
-				default: return DataType.DATETIME;
-			}
-		} else if (type.isAssignableFrom(Boolean.class) || type == boolean.class) {
+		} else if (DateConv.isTypeOfDate(type)) {
+			return DateConv.guessAblType(field, declaredDataType(field));
+		} else if (Boolean.class.isAssignableFrom(type) || type == boolean.class) {
 			return DataType.LOGICAL;
-		} else if (type.isAssignableFrom(Rowid.class)) {
+		} else if (Rowid.class.isAssignableFrom(type)) {
 			return DataType.ROWID;
 		} else if (type.isEnum()) {
 			return DataType.CHARACTER;
 
 		} else if (type.getSimpleName().equals("byte[]")) {
-			//} else if (type.isAssignableFrom(byte.class) && type.isArray()) {
+			//} else if (byte.class == type && type.isArray()) {
 			DataType datatype = declaredDataType(field);
 			switch(datatype) {
 				case BLOB:
@@ -391,7 +382,7 @@ public class TableUtils {
 				default: // RAW?
 					throw new OpaStructureException("DataType.BLOB is required in OpaField annotation for 'byte[]' field '"+ field.getName() +"'");
 			}
-		} else { // ??? exception
+		} else {
 			throw new OpaStructureException("Invalid field type (field=" + field.getName() +" type=" +field.getType().getSimpleName() + ")");
 		}
 	}
@@ -409,14 +400,10 @@ public class TableUtils {
 		return af == null || "".equals(af.name()) ? field.getName() : af.name();
 	}
 
-	private static Date toJavaDate(java.sql.Date sqlDate) {
-		return sqlDate == null ? null : new Date(sqlDate.getTime());
-	}
 
-
-	/* ***************************************************************\
+	/*
 	 * OpaInputResultSet
-	\* ***************************************************************/
+	*/
 	static class OpaInputResultSet extends InputResultSet {
 
 		private List<?> rowList;
@@ -446,11 +433,9 @@ public class TableUtils {
 		public Object getObject(int pos) throws SQLException {
 			try {
 				if (currentRow == null)
-					currentRow = TableUtils.beanToList(rowList.get(rowNum));
+					currentRow = beanToList(rowList.get(rowNum));
 				return currentRow.get(pos - 1);
-			} catch (IllegalArgumentException e) {
-				throw new SQLException(e);
-			} catch (IllegalAccessException e) {
+			} catch (IllegalArgumentException | IllegalAccessException | OpaStructureException e) {
 				throw new SQLException(e);
 			}
 		}
@@ -469,8 +454,31 @@ public class TableUtils {
 			return rowNum >= 0;
 		}
 
+		private static List<Object> beanToList (Object bean) throws IllegalArgumentException, IllegalAccessException, OpaStructureException {
+			List<Object> row = new ArrayList<Object>();
+			Class<?> clazz = bean.getClass();
+			boolean allowOmitOpaField = clazz.getAnnotation(OpaTable.class).allowOmitOpaField();
+
+			for (Field field : clazz.getDeclaredFields()) {
+				field.setAccessible(true);
+				if (getOpaName(field, allowOmitOpaField) == null)
+					continue;
+				Class<?> type = field.getType();
+				if (DateConv.isTypeOfDate(type)) {
+					row.add(DateConv.convToProDate(field, bean));
+				} else if (type.isEnum()) { // enum as char
+					String sval = field.get(bean).toString();
+					row.add(sval);
+				} else {
+					row.add(field.get(bean)); // other types - as is
+				}
+			}
+			return row;
+		}
+
+
 		//
-		// auto generated (for java 1.6+)
+		// auto generated (for java 1.8+)
 		//
 		public RowId getRowId(int columnIndex) throws SQLException {
 			throw new RuntimeException("Unimplemented InputResultSet method");
@@ -671,6 +679,18 @@ public class TableUtils {
 
 		public <T> T getObject(String columnLabel, Class<T> type) throws SQLException {
 			throw new RuntimeException("Unimplemented InputResultSet method");
+		}
+
+		public void updateObject(int columnIndex, Object x, SQLType targetSqlType, int scaleOrLength) throws SQLException {
+		}
+
+		public void updateObject(String columnLabel, Object x, SQLType targetSqlType, int scaleOrLength) throws SQLException {
+		}
+
+		public void updateObject(int columnIndex, Object x, SQLType targetSqlType) throws SQLException {
+		}
+
+		public void updateObject(String columnLabel, Object x, SQLType targetSqlType) throws SQLException {
 		}
 
 		public <T> T unwrap(Class<T> iface) throws SQLException {

@@ -1,11 +1,6 @@
 package com.github.labai.opa;
 
-import com.github.labai.opa.IntTests.AblIntTestBase;
-import com.github.labai.opa.Opa.IoDir;
-import com.github.labai.opa.Opa.OpaField;
-import com.github.labai.opa.Opa.OpaParam;
-import com.github.labai.opa.Opa.OpaProc;
-import com.github.labai.opa.Opa.OpaTable;
+import com.github.labai.opa.Opa.*;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -15,7 +10,7 @@ import java.util.List;
 /**
  * Created by Augustus on 2014.12.18.
  */
-public class I06EnumTest extends AblIntTestBase {
+public class I06EnumTest extends IntTestBase {
 
 	public enum SampleEnum {
 		ENUM_1, ENUM_2;
@@ -33,12 +28,12 @@ public class I06EnumTest extends AblIntTestBase {
 	}
 
 
-	@OpaProc(proc="jpx/test/opa/test_06_enums.p")
+	@OpaProc(proc = "jpx/test/opa/test_06_enums.p")
 	public static class TableOutEnumOpp {
 		@OpaParam
 		public SampleEnum enumIn;
 
-		@OpaParam(table=SampleTableWithEnum.class)
+		@OpaParam(table = SampleTableWithEnum.class)
 		public List<SampleTableWithEnum> ttin;
 
 		@OpaParam(io = IoDir.OUT)
@@ -53,13 +48,13 @@ public class I06EnumTest extends AblIntTestBase {
 		@OpaParam(io = IoDir.OUT)
 		public SampleEnum enumOut4;
 
-		@OpaParam(table=SampleTableWithEnum.class, io=IoDir.OUT)
+		@OpaParam(table = SampleTableWithEnum.class, io = IoDir.OUT)
 		public List<SampleTableWithEnum> tt;
 
-		@OpaParam(io=IoDir.OUT)
+		@OpaParam(io = IoDir.OUT)
 		public String errorCode;
 
-		@OpaParam(io=IoDir.OUT)
+		@OpaParam(io = IoDir.OUT)
 		public String errorMessage;
 	}
 

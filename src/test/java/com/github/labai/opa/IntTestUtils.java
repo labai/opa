@@ -1,34 +1,16 @@
 package com.github.labai.opa;
 
+import com.progress.open4gl.Rowid;
 import com.github.labai.opa.Opa.DataType;
 import com.github.labai.opa.Opa.OpaField;
 import com.github.labai.opa.Opa.OpaTable;
 import com.github.labai.opa.Opa.OpaTransient;
-import com.github.labai.opa.OpaServer.SessionModel;
-import com.progress.open4gl.Rowid;
-import org.junit.Assume;
-import org.junit.Before;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class IntTests {
-
-	public static class AblIntTestBase {
-
-		protected OpaServer server;
-
-		@Before
-		public void init() {
-			Assume.assumeTrue("Is integrations test enabled?", TestParams.INT_TESTS_ENABLED);
-			server = new OpaServer(TestParams.APP_SERVER, TestParams.APP_USER, TestParams.APP_USER, SessionModel.STATE_FREE);
-		}
-
-		protected void log(String msg){
-			System.out.println(msg);
-		}
-	}
+public class IntTestUtils {
 
 	/*
 	 * sample table, used in parameters
@@ -38,17 +20,26 @@ public class IntTests {
 	static class SampleTable implements Cloneable {
 		@OpaField(name = "charVal")
 		public String charValx;
+
 		private Integer intVal;
+
 		public Long int64Val;
+
 		public BigDecimal decVal;
+
 		@OpaField(dataType = DataType.DATE)
 		public Date dateVal;
+
 		public Boolean logVal;
+
 		@OpaField(dataType = DataType.DATETIME)
 		public Date tmVal;
+
 		@OpaField(dataType = DataType.DATETIMETZ)
 		public Date tmtzVal;
+
 		public Rowid rowid;
+
 		@OpaField(dataType = DataType.RECID)
 		public Long recid1;
 
@@ -90,7 +81,7 @@ public class IntTests {
 		}
 
 		public SampleTable clone() throws CloneNotSupportedException {
-			return (SampleTable)super.clone();
+			return (SampleTable) super.clone();
 		}
 	}
 

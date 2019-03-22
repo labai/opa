@@ -1,10 +1,9 @@
 package com.github.labai.opa;
 
+import com.github.labai.opa.IntTestUtils.SampleTable;
 import com.github.labai.opa.Opa.IoDir;
 import com.github.labai.opa.Opa.OpaParam;
 import com.github.labai.opa.Opa.OpaProc;
-import com.github.labai.opa.IntTests.AblIntTestBase;
-import com.github.labai.opa.IntTests.SampleTable;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -13,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class I04TableInOutTest extends AblIntTestBase{
+public class I04TableInOutTest extends IntTestBase {
 
 	@OpaProc(proc="jpx/test/opa/test_04_table_inout.p")
 	static class TablesInOutOpp {
@@ -37,10 +36,6 @@ public class I04TableInOutTest extends AblIntTestBase{
 		public String errorMessage;
 	}
 
-	/*
-	 *
-	 *
-	 */
 	//@Ignore
 	@Test
 	public void testTableOutSetter() throws OpaException, CloneNotSupportedException {
@@ -78,12 +73,6 @@ public class I04TableInOutTest extends AblIntTestBase{
 		String sout0 = "sending something|200001|1|1.1|null|true|null|null|null|null";
 		String sinout0 = "sending something|200002|1|1.1|null|true|null|null|null|null";
 
-		/*
-		for (SampleTable ttout: opp.ttout)
-			System.out.println(IntTests.sampleTableToString(ttout));
-		for (SampleTable ttout: opp.ttinout)
-			System.out.println(IntTests.sampleTableToString(ttout));
-		*/
 		Assert.assertEquals(sout0, opp.ttout.get(0).toString());
 		Assert.assertEquals(sinout0, opp.ttinout.get(0).toString());
 

@@ -87,7 +87,41 @@ public class I07PoolTest {
 		}
 
 		Assert.assertEquals(0, server.getPool().getNumActive());
-		Assert.assertEquals(3, server.getPool().getNumIdle()); // 3 idle connections - max at 1 time
+		Assert.assertEquals(3, server.getPool().getNumIdle()); // 3 idle connections - was max at 1 time
+
+	}
+
+	@Test
+	public void testPoolDropTTL() throws Exception {
+		server.setMaxPoolSize(5);
+		server.setConnectionTTLSec(1);
+
+		log("Starting testPoolDropTTL");
+		Thread t1 = new Thread(createRunnable());
+		Thread t2 = new Thread(createRunnable());
+		Thread t3 = new Thread(createRunnable());
+		t1.start(); t2.start(); t3.start();
+		while (t1.isAlive() || t2.isAlive() || t3.isAlive()) {
+			log("Still waiting...");
+			t1.join(600);
+			t2.join(600);
+			t3.join(600);
+		}
+
+		Assert.assertEquals(0, server.getPool().getNumActive());
+		Assert.assertEquals(3, server.getPool().getNumIdle()); // 3 idle connections - was max at 1 time
+
+		Thread.sleep(500);
+
+		t1 = new Thread(createRunnable());
+		t1.start();
+		while (t1.isAlive()) {
+			log("Still waiting...");
+			t1.join(600);
+		}
+
+		// expect to be closed all expired and new 1 created
+		Assert.assertEquals(1, server.getPool().getNumIdle());
 
 	}
 
@@ -97,7 +131,7 @@ public class I07PoolTest {
 			@Override
 			public void run() {
 				try {
-					log(Thread.currentThread().getName() + " starting thread. Pool before: busy=" + server.getPool().getNumActive() + " idle=" + server.getPool().getNumIdle());
+					log(Thread.currentThread().getName() + " starting thread, will do job 1s. Pool before: busy=" + server.getPool().getNumActive() + " idle=" + server.getPool().getNumIdle());
 					WaitOpp opp1 = new WaitOpp();
 					opp1.waitSec = new BigDecimal("1");
 					server.runProc(opp1, PROC_07_NAME);

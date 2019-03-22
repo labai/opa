@@ -1,32 +1,27 @@
 package com.github.labai.opa;
 
-import com.github.labai.opa.IntTests.AblIntTestBase;
-import com.github.labai.opa.IntTests.SampleTable;
-import com.github.labai.opa.Opa.IoDir;
-import com.github.labai.opa.Opa.OpaField;
-import com.github.labai.opa.Opa.OpaParam;
-import com.github.labai.opa.Opa.OpaProc;
-import com.github.labai.opa.Opa.OpaTable;
+import com.github.labai.opa.IntTestUtils.SampleTable;
+import com.github.labai.opa.Opa.*;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
 
 
-public class I05TableHandleTest extends AblIntTestBase {
+public class I05TableHandleTest extends IntTestBase {
 
-	@OpaProc(proc="jpx/test/opa/test_05_table_handle.p")
+	@OpaProc(proc = "jpx/test/opa/test_05_table_handle.p")
 	public static class TableHandleOpp {
 		@OpaParam
 		public String someId;
 
-		@OpaParam(table=SampleTable.class, io= IoDir.OUT)
+		@OpaParam(table = SampleTable.class, io = IoDir.OUT)
 		public List<SampleTable> tt;
 
-		@OpaParam(io=IoDir.OUT)
+		@OpaParam(io = IoDir.OUT)
 		public String errorCode;
 
-		@OpaParam(io=IoDir.OUT)
+		@OpaParam(io = IoDir.OUT)
 		public String errorMessage;
 	}
 
@@ -46,14 +41,13 @@ public class I05TableHandleTest extends AblIntTestBase {
 		Assert.assertEquals(s1, opp.tt.get(1).toString());
 		Assert.assertEquals(s2, opp.tt.get(2).toString());
 
-		//log("TableOut ok");
 	}
 
-	///////////////////////////////////////////////////////////////////
+	//
 	// Test
 	//  a) @OpaField(name="...")
 	//  b) different fields between OE and Java
-	///////////////////////////////////////////////////////////////////
+	//
 
 	@OpaTable(allowOmitOpaField = true)
 	private static class SampleTable2 {
@@ -104,7 +98,6 @@ public class I05TableHandleTest extends AblIntTestBase {
 		Assert.assertEquals(s1, opp.tt.get(1).toString());
 		Assert.assertEquals(s2, opp.tt.get(2).toString());
 
-		//log("TableOut ok");
 	}
 
 

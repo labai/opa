@@ -1,12 +1,12 @@
 package com.github.labai.opa.sys;
 
+import com.progress.open4gl.Open4GLException;
+import com.progress.open4gl.RunTime4GLException;
 import com.github.labai.opa.Opa;
 import com.github.labai.opa.OpaException;
 import com.github.labai.opa.OpaServer.SessionModel;
 import com.github.labai.opa.sys.Exceptions.OpaSessionTimeoutException;
 import com.github.labai.opa.sys.Exceptions.OpaStructureException;
-import com.progress.open4gl.Open4GLException;
-import com.progress.open4gl.RunTime4GLException;
 import com.github.labai.opa.sys.Pool.ConnParams;
 import com.github.labai.opa.sys.Pool.JpxConnPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -16,9 +16,10 @@ import org.slf4j.LoggerFactory;
 import java.sql.SQLException;
 
 /**
+ * @author Augustus
+ *
  * For internal usage only (is not part of api)
  *
- * @author Augustus
  */
 public class AppServer {
 	private final static Logger logger = LoggerFactory.getLogger(Opa.class);

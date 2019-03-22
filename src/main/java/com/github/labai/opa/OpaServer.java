@@ -13,7 +13,7 @@ public class OpaServer {
 		STATELESS (0),
 		STATE_FREE (1);
 		public final int progressId;
-		private SessionModel(int id) {
+		SessionModel(int id) {
 			this.progressId = id;
 		}
 	}
@@ -22,7 +22,8 @@ public class OpaServer {
 		appServer = new AppServer(serverUrl, userName, password, sessionModel);
 	}
 
-	/** Run OpenEdge procedure on AppServer.
+	/**
+	 *  Run OpenEdge procedure on AppServer.
 	 *  opp must describe OpenEdge procedure parameters using @OpaProc and @OpaParam annotations.
 	 *  Procedure name will be in opp annotation, e.g. @OpaProc(proc="proc.p").
 	 */
@@ -30,7 +31,8 @@ public class OpaServer {
 		appServer.runProc(opp, null);
 	}
 
-	/** Run OpenEdge procedure on AppServer.
+	/**
+	 *  Run OpenEdge procedure on AppServer.
 	 *  opp must describe OpenEdge procedure parameters using @OpaProc and @OpaParam annotations
 	 */
 	public void runProc(Object opp, String procName) throws OpaException {

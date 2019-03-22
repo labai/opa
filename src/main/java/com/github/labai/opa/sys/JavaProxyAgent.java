@@ -1,20 +1,21 @@
 package com.github.labai.opa.sys;
 
-import com.github.labai.opa.sys.Exceptions.OpaSessionTimeoutException;
-import com.github.labai.opa.sys.Exceptions.OpaStructureException;
 import com.progress.open4gl.Open4GLException;
 import com.progress.open4gl.RunTimeProperties;
 import com.progress.open4gl.javaproxy.Connection;
+import com.github.labai.opa.sys.Exceptions.OpaSessionTimeoutException;
+import com.github.labai.opa.sys.Exceptions.OpaStructureException;
 import com.github.labai.opa.sys.Pool.ConnParams;
 
 import java.sql.SQLException;
 
 /**
+ * @author Augustus
+ *
  * For internal usage only (is not part of api)
  *
  * Will be created in connection pool
  *
- * @author Augustus
  */
 class JavaProxyAgent {
 	private JavaProxyImpl impl;

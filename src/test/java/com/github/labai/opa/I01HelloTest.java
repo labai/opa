@@ -1,6 +1,5 @@
 package com.github.labai.opa;
 
-import com.github.labai.opa.IntTests.AblIntTestBase;
 import com.github.labai.opa.Opa.IoDir;
 import com.github.labai.opa.Opa.OpaParam;
 import com.github.labai.opa.Opa.OpaProc;
@@ -8,14 +7,14 @@ import org.junit.Assert;
 import org.junit.Test;
 
 
-public class I01HelloTest extends AblIntTestBase {
+public class I01HelloTest extends IntTestBase {
 
 	@OpaProc(proc="jpx/test/opa/test_01_hello.p")
 	public static class HelloWorldOpp {
 		@OpaParam
 		private String name;
 
-		@OpaParam(io= IoDir.OUT)
+		@OpaParam(io = IoDir.OUT)
 		private String answer;
 	}
 
@@ -35,7 +34,7 @@ public class I01HelloTest extends AblIntTestBase {
 		@OpaParam
 		private String name;
 
-		@OpaParam(io= IoDir.OUT)
+		@OpaParam(io = IoDir.OUT)
 		private String answer;
 	}
 
@@ -53,7 +52,7 @@ public class I01HelloTest extends AblIntTestBase {
 		@OpaParam
 		private String name;
 
-		@OpaParam(io= IoDir.OUT)
+		@OpaParam(io = IoDir.OUT)
 		private String answer;
 	}
 
