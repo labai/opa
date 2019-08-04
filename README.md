@@ -28,6 +28,7 @@ OPA automatically (on the fly) maps input parameters from Java class to OpenEdge
 ----
 ## USAGE
 
+
 It is required to add dependency in pom.xml, to use OPA:
 ```xml
 <dependency>
@@ -38,6 +39,10 @@ It is required to add dependency in pom.xml, to use OPA:
 ```
 Also `o4glrt.jar` from OpenEdge install dir must be accessible. 
 It is good idea to add this jar as artifact into maven repository and use as dependency in pom.xml.
+
+For using with OpenEdge PAS 12.0 see in 
+[Opa-on-PAS-v12](docs/wiki/Opa-on-PAS-v12.md) in wiki.
+  
 
 ---
 ## MORE INFO
