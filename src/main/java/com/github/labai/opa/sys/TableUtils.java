@@ -7,13 +7,13 @@ import com.github.labai.opa.Opa.OpaField;
 import com.github.labai.opa.Opa.OpaParam;
 import com.github.labai.opa.Opa.OpaTable;
 import com.github.labai.opa.Opa.OpaTransient;
-import com.github.labai.opa.sys.Exceptions.OpaStructureException;
 import com.progress.open4gl.InputResultSet;
 import com.progress.open4gl.ResultSetHolder;
 import com.progress.open4gl.Rowid;
 import com.progress.open4gl.dynamicapi.MetaSchema;
 import com.progress.open4gl.dynamicapi.ResultSet;
 import com.progress.open4gl.dynamicapi.ResultSetMetaData;
+import com.github.labai.opa.sys.Exceptions.OpaStructureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +50,35 @@ import java.util.Set;
 class TableUtils {
 	private final static Logger logger = LoggerFactory.getLogger(Opa.class);
 
+	/**
+	 *  a) if field in opp field list is provided, then fill it, otherwise (if null) - create ArrayList;
+	 *  b) if provided list is not empty - throw exception
+	 *
+	 */
+	static void copyAllRecordSetsToBean (Map<Field, ResultSetHolder> rsmap, Object opp) throws OpaStructureException, SQLException {
+		// fill TT
+		for (Field field: rsmap.keySet()) {
+			try {
+				ResultSetHolder rsh = rsmap.get(field);
+				OpaParam pp = field.getAnnotation(OpaParam.class);
+				List list = (List)field.get(opp);
+				if (list == null)
+					list = new ArrayList();
+				else if (list.isEmpty() == false) {
+					IoDir io = field.getAnnotation(OpaParam.class).io();
+					if (io == IoDir.INOUT)
+						list.clear(); // for in-out - clear input data
+					else if (io == IoDir.OUT)
+						throw new OpaStructureException("List must be empty before call OpenEdge procedure (field=" + field.getName() + ")");
+				}
+				resultSetToList(pp.table(), (ResultSet) rsh.getResultSetValue(), list);
+
+				field.set(opp, list);
+			} catch (IllegalAccessException e) {
+				throw new OpaStructureException("Error while assigning resultSet to opp", e);
+			}
+		}
+	}
 
 	static class ColDef<T> {
 		final Field field;
@@ -80,38 +109,10 @@ class TableUtils {
 			try {
 				String nm = field.getName();
 				return clazz.getMethod("set" + nm.substring(0, 1).toUpperCase() + nm.substring(1), field.getType());
-			} catch (SecurityException | NoSuchMethodException e) {
+			} catch (SecurityException e) {
 				return null; // will ignore if can't access
-			}
-		}
-	}
-
-	/**
-	 *  a) if field in opp field list is provided, then fill it, otherwise (if null) - create ArrayList;
-	 *  b) if provided list is not empty - throw exception
-	 *
-	 */
-	static void copyAllRecordSetsToBean (Map<Field, ResultSetHolder> rsmap, Object opp) throws OpaStructureException, SQLException {
-		// fill TT
-		for (Field field: rsmap.keySet()) {
-			try {
-				ResultSetHolder rsh = rsmap.get(field);
-				OpaParam pp = field.getAnnotation(OpaParam.class);
-				List list = (List)field.get(opp);
-				if (list == null)
-					list = new ArrayList();
-				else if (list.isEmpty() == false) {
-					IoDir io = field.getAnnotation(OpaParam.class).io();
-					if (io == IoDir.INOUT)
-						list.clear(); // for in-out - clear input data
-					else if (io == IoDir.OUT)
-						throw new OpaStructureException("List must be empty before call OpenEdge procedure (field=" + field.getName() + ")");
-				}
-				resultSetToList(pp.table(), (ResultSet) rsh.getResultSetValue(), list);
-
-				field.set(opp, list);
-			} catch (IllegalAccessException e) {
-				throw new OpaStructureException("Error while assigning resultSet to opp", e);
+			} catch (NoSuchMethodException ignoreMe) {
+				return null;
 			}
 		}
 	}

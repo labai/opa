@@ -1,8 +1,8 @@
 package com.github.labai.opa.sys;
 
-import com.progress.open4gl.DateHolder;
 import com.github.labai.opa.Opa;
 import com.github.labai.opa.Opa.DataType;
+import com.progress.open4gl.DateHolder;
 import com.github.labai.opa.sys.Exceptions.OpaStructureException;
 import com.github.labai.opa.sys.TableUtils.ColDef;
 import org.slf4j.Logger;
@@ -148,7 +148,7 @@ class DateConv {
 			return;
 		}
 
-		ColDef<T> colDef = new ColDef<>(field, (Class<T>)pojo.getClass(), true);
+		ColDef<T> colDef = new ColDef<T>(field, (Class<T>)pojo.getClass(), true);
 
 		switch (guessAblType(field, colDef.ablType)) {
 			case DATE:

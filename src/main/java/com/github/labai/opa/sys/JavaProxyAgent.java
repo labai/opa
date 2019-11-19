@@ -6,8 +6,11 @@ import com.progress.open4gl.javaproxy.Connection;
 import com.github.labai.opa.sys.Exceptions.OpaSessionTimeoutException;
 import com.github.labai.opa.sys.Exceptions.OpaStructureException;
 import com.github.labai.opa.sys.Pool.ConnParams;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
+import java.util.function.Supplier;
 
 /**
  * @author Augustus
@@ -18,6 +21,7 @@ import java.sql.SQLException;
  *
  */
 class JavaProxyAgent {
+	private final static Logger logger = LoggerFactory.getLogger(JavaProxyAgent.class);
 	private JavaProxyImpl impl;
 
 	JavaProxyAgent(ConnParams connParams) throws Open4GLException {
@@ -25,10 +29,32 @@ class JavaProxyAgent {
 		//if (RunTimeProperties.getDynamicApiVersion() != PROXY_VER)
 		//	throw new Open4GLException(m_wrongProxyVer, null);
 		Connection connection = new Connection(connParams.urlString, connParams.userId, connParams.password, "" /*appServerInfo*/);
-		if (connParams.sessionModel != null)
+
+		if (connParams.sessionModel != null) {
 			connection.setIntProperty(AppServer.PROGRESS_PROPS_KEY_SESSION_MODEL, connParams.sessionModel.progressId);
+		}
+
+		if (connParams.sslCertificateStore != null && !"".equals(connParams.sslCertificateStore)) {
+			connection.setCertificateStore(connParams.sslCertificateStore);
+		}
+
+		if (connParams.sslNoHostVerify != null) {
+			connection.setNoHostVerify(connParams.sslNoHostVerify);
+		}
+
+		if (connParams.connectionConfigurer != null) {
+			try {
+				connParams.connectionConfigurer.accept(connection);
+			} catch (Throwable e) {
+				logger.warn("Exception while calling manual connection configuration", e);
+			}
+		}
 		impl = new JavaProxyImpl("OpaJavaProxy", connection, RunTimeProperties.tracer);
 		connection.releaseConnection();
+
+		if (connParams.requestIdGenerator != null) {
+			impl.setRequestIdGenerator(connParams.requestIdGenerator);
+		}
 
 	}
 
@@ -36,8 +62,8 @@ class JavaProxyAgent {
 		impl._release();
 	}
 
-	String runProc(Object opp, String procName) throws Open4GLException, SQLException, OpaStructureException, OpaSessionTimeoutException {
-		return impl.runProc(opp, procName);
+	String runProc(Object opp, String procName, Supplier<String> requestIdProvider) throws Open4GLException, SQLException, OpaStructureException, OpaSessionTimeoutException {
+		return impl.runProc(opp, procName, requestIdProvider);
 	}
 }
 

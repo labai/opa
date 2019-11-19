@@ -134,7 +134,7 @@ public class I07PoolTest {
 					log(Thread.currentThread().getName() + " starting thread, will do job 1s. Pool before: busy=" + server.getPool().getNumActive() + " idle=" + server.getPool().getNumIdle());
 					WaitOpp opp1 = new WaitOpp();
 					opp1.waitSec = new BigDecimal("1");
-					server.runProc(opp1, PROC_07_NAME);
+					server.runProc(opp1, PROC_07_NAME, null);
 					log(Thread.currentThread().getName() + " thread done. Pool after: busy=" + server.getPool().getNumActive() + " idle=" + server.getPool().getNumIdle());
 				} catch (OpaException e) {
 					log(Thread.currentThread().getName() + " OpaException: " + e.getMessage());

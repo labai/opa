@@ -1,7 +1,11 @@
 package com.github.labai.opa;
 
 import com.github.labai.opa.IntTestUtils.SampleTable;
-import com.github.labai.opa.Opa.*;
+import com.github.labai.opa.Opa.IoDir;
+import com.github.labai.opa.Opa.OpaField;
+import com.github.labai.opa.Opa.OpaParam;
+import com.github.labai.opa.Opa.OpaProc;
+import com.github.labai.opa.Opa.OpaTable;
 import org.junit.Assert;
 import org.junit.Test;
 

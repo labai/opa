@@ -1,10 +1,10 @@
 package com.github.labai.opa;
 
-import com.progress.open4gl.Rowid;
 import com.github.labai.opa.Opa.DataType;
 import com.github.labai.opa.Opa.IoDir;
 import com.github.labai.opa.Opa.OpaParam;
 import com.github.labai.opa.Opa.OpaProc;
+import com.progress.open4gl.Rowid;
 import org.junit.Assert;
 import org.junit.Test;
 

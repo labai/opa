@@ -1,6 +1,10 @@
 package com.github.labai.opa;
 
+import com.progress.open4gl.javaproxy.Connection;
 import com.github.labai.opa.sys.AppServer;
+
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * @author Augustus
@@ -28,7 +32,11 @@ public class OpaServer {
 	 *  Procedure name will be in opp annotation, e.g. @OpaProc(proc="proc.p").
 	 */
 	public void runProc(Object opp) throws OpaException {
-		appServer.runProc(opp, null);
+		appServer.runProc(opp, null, null);
+	}
+
+	public void runProc(Object opp, Supplier<String> requestIdProvider) throws OpaException {
+		appServer.runProc(opp, null, requestIdProvider);
 	}
 
 	/**
@@ -36,7 +44,10 @@ public class OpaServer {
 	 *  opp must describe OpenEdge procedure parameters using @OpaProc and @OpaParam annotations
 	 */
 	public void runProc(Object opp, String procName) throws OpaException {
-		appServer.runProc(opp, procName);
+		appServer.runProc(opp, procName, null);
+	}
+	public void runProc(Object opp, String procName, Supplier<String> requestIdProvider) throws OpaException {
+		appServer.runProc(opp, procName, requestIdProvider);
 	}
 
 	/** Set maximum pool size (maximum connections to OpenEdge AppServer). Default is 10 */
@@ -52,6 +63,25 @@ public class OpaServer {
 	/** Set connection time-to-live in seconds. Default is 298s (4:58) */
 	public void setConnectionTTLSec(int ttlInSec) {
 		appServer.setConnectionTTLSec(ttlInSec);
+	}
+
+	/** Set certificate (psccerts.zip) path for ssl */
+	public void setCertificateStore(String psccertsPath) {
+		appServer.setCertificateStore(psccertsPath);
+	}
+
+	/** set flag to not to verify hosts for ssl */
+	public void setNoHostVerify(Boolean value) {
+		appServer.setNoHostVerify(value);
+	}
+
+	/** Set connection configuration provider - for manual configuration */
+	public void setConnectionConfigurer(Consumer<Connection> connConfigurer) {
+		appServer.setConnectionConfigurer(connConfigurer);
+	}
+
+	public void setRequestIdGenerator(Supplier<String> requestIdGenerator) {
+		appServer.setRequestIdGenerator(requestIdGenerator);
 	}
 
 }

@@ -1,10 +1,11 @@
 package com.github.labai.opa.sys;
 
-import com.progress.open4gl.Open4GLException;
-import com.progress.open4gl.RunTime4GLException;
 import com.github.labai.opa.Opa;
 import com.github.labai.opa.OpaException;
 import com.github.labai.opa.OpaServer.SessionModel;
+import com.progress.open4gl.Open4GLException;
+import com.progress.open4gl.RunTime4GLException;
+import com.progress.open4gl.javaproxy.Connection;
 import com.github.labai.opa.sys.Exceptions.OpaSessionTimeoutException;
 import com.github.labai.opa.sys.Exceptions.OpaStructureException;
 import com.github.labai.opa.sys.Pool.ConnParams;
@@ -14,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * @author Augustus
@@ -43,7 +46,7 @@ public class AppServer {
 	// Remarks:
 	// - procName can be null (then proc name must be set in @OpaProc))
 	//
-	public void runProc(Object opp, String procName) throws OpaException {
+	public void runProc(Object opp, String procName, Supplier<String> requestIdProvider) throws OpaException {
 		JavaProxyAgent jpx;
 		JavaProxyAgent jpx2 = null;
 		try {
@@ -54,7 +57,7 @@ public class AppServer {
 
 		try {
 			try {
-				jpx.runProc(opp, procName);
+				jpx.runProc(opp, procName, requestIdProvider);
 				return;
 			} catch (OpaStructureException e) {
 				throw e;
@@ -85,7 +88,7 @@ public class AppServer {
 			}
 
 			try {
-				jpx2.runProc(opp, procName);
+				jpx2.runProc(opp, procName, requestIdProvider);
 				return;
 			} catch (RunTime4GLException e) {
 				throw new OpaException("4GL runtime error: " + e.getMessage(), e);
@@ -123,11 +126,29 @@ public class AppServer {
 		pool.setConnectionTTLSec(ttlInSec);
 	}
 
+	public void setCertificateStore(String psccertsPath) {
+		pool.setCertificateStore(psccertsPath);
+	}
+
+	public void setNoHostVerify(Boolean value) {
+		pool.setNoHostVerify(value);
+	}
+
+
 	// 0 = no timeout
 	public void setConnectionTimeout(long timeoutMilliseconds) {
 		if (timeoutMilliseconds == 0)
 			timeoutMilliseconds = Long.MAX_VALUE;
 		pool.setMaxWaitMillis(timeoutMilliseconds);
+	}
+
+	// manual connection configuration (function)
+	public void setConnectionConfigurer(Consumer<Connection> connConfigurer) {
+		pool.setConnectionConfigurer(connConfigurer);
+	}
+
+	public void setRequestIdGenerator(Supplier<String> requestIdGenerator) {
+		pool.setRequestIdGenerator(requestIdGenerator);
 	}
 
 	/** package scoped. For testing only */
