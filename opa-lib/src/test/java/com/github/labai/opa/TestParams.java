@@ -11,4 +11,6 @@ public class TestParams {
 	final static public String APP_SERVER_STATELESS = "AppServer://progress.app.server/asstls";
 	final static public String APP_USER = "-";
 	final static public String APP_PASSWORD = "-";
+
+	final static public String APP_PSCCERTS = "psccerts.zip";
 }

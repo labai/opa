@@ -9,7 +9,7 @@ import org.junit.Test;
 
 public class I01HelloTest extends IntTestBase {
 
-	@OpaProc(proc="jpx/test/opa/test_01_hello.p")
+	@OpaProc(proc="tests/opalib/test_01_hello.p")
 	public static class HelloWorldOpp {
 		@OpaParam
 		private String name;
@@ -18,7 +18,6 @@ public class I01HelloTest extends IntTestBase {
 		private String answer;
 	}
 
-	//@Ignore
 	@Test
 	public void testHello() throws OpaException {
 		HelloWorldOpp opp = new HelloWorldOpp();
@@ -38,12 +37,11 @@ public class I01HelloTest extends IntTestBase {
 		private String answer;
 	}
 
-	//@Ignore
 	@Test
 	public void testHello2WithProcName() throws OpaException {
 		HelloWorld2Opp opp = new HelloWorld2Opp();
 		opp.name = "Augustus";
-		server.runProc(opp, "jpx/test/opa/test_01_hello.p");
+		server.runProc(opp, "tests/opalib/test_01_hello.p");
 		Assert.assertEquals("Hello, Augustus!", opp.answer);
 	}
 
@@ -56,12 +54,11 @@ public class I01HelloTest extends IntTestBase {
 		private String answer;
 	}
 
-	//@Ignore
 	@Test
 	public void testHello3WithProcName() throws OpaException {
 		HelloWorld3Opp opp = new HelloWorld3Opp();
 		opp.name = "Augustus";
-		server.runProc(opp, "jpx/test/opa/test_01_hello.p");
+		server.runProc(opp, "tests/opalib/test_01_hello.p");
 		Assert.assertEquals("Hello, Augustus!", opp.answer);
 	}
 

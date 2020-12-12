@@ -36,7 +36,7 @@ public class I07BlobTest extends IntTestBase {
 	}
 
 
-	@OpaProc(proc="jpx/test/opa/test_07_blobs.p")
+	@OpaProc(proc="tests/opalib/test_07_blobs.p")
 	public static class TableOutBlobOpp {
 		@OpaParam
 		public String charValIn;

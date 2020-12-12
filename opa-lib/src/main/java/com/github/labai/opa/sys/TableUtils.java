@@ -7,13 +7,13 @@ import com.github.labai.opa.Opa.OpaField;
 import com.github.labai.opa.Opa.OpaParam;
 import com.github.labai.opa.Opa.OpaTable;
 import com.github.labai.opa.Opa.OpaTransient;
+import com.github.labai.opa.sys.Exceptions.OpaStructureException;
 import com.progress.open4gl.InputResultSet;
 import com.progress.open4gl.ResultSetHolder;
 import com.progress.open4gl.Rowid;
 import com.progress.open4gl.dynamicapi.MetaSchema;
 import com.progress.open4gl.dynamicapi.ResultSet;
 import com.progress.open4gl.dynamicapi.ResultSetMetaData;
-import com.github.labai.opa.sys.Exceptions.OpaStructureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -155,7 +155,7 @@ class TableUtils {
 		boolean ignoreSetters = false; // leave for future implementations...
 
 		// Java entity field name map (name -> javaField)
-		Map<String, Field> entityFields = new LinkedHashMap<>();
+		Map<String, Field> entityFields = new LinkedHashMap<String, Field>();
 		for (Field field : clazz.getDeclaredFields()) {
 			field.setAccessible(true);
 			String name = getOpaName(field, allowOmitOpaField);
@@ -165,8 +165,8 @@ class TableUtils {
 		}
 
 		// read OE columns -> field (read from metadata)
-		Map<String, ColDef<T>> columnNames = new LinkedHashMap<>();
-		Set<Field> foundInOE = new HashSet<>();
+		Map<String, ColDef<T>> columnNames = new LinkedHashMap<String, ColDef<T>>();
+		Set<Field> foundInOE = new HashSet<Field>();
 		int count;
 		count = resultSet.getMetaData().getColumnCount();
 		for (int i = 1; i <= count; i++) {
@@ -176,7 +176,7 @@ class TableUtils {
 				logger.warn("Column '{}' from resultSet (OE temp-table) was not found in entity '{}'", colName, clazz.getName());
 			else {
 				foundInOE.add(f);
-				columnNames.put(colName, new ColDef<>(f, clazz, ignoreSetters));
+				columnNames.put(colName, new ColDef<T>(f, clazz, ignoreSetters));
 			}
 		}
 		for (Field f : entityFields.values()) {
@@ -466,7 +466,7 @@ class TableUtils {
 					continue;
 				Class<?> type = field.getType();
 				if (DateConv.isTypeOfDate(type)) {
-					row.add(DateConv.convToProDate(field, bean));
+					row.add(DateConv.convToGregorian(field, bean));
 				} else if (type.isEnum()) { // enum as char
 					String sval = field.get(bean).toString();
 					row.add(sval);

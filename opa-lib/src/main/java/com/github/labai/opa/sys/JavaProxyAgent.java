@@ -1,16 +1,17 @@
 package com.github.labai.opa.sys;
 
-import com.progress.open4gl.Open4GLException;
-import com.progress.open4gl.RunTimeProperties;
-import com.progress.open4gl.javaproxy.Connection;
+import com.github.labai.opa.OpaServer.RunResult;
+import com.github.labai.opa.sys.AppServer.RequestIdProvider;
 import com.github.labai.opa.sys.Exceptions.OpaSessionTimeoutException;
 import com.github.labai.opa.sys.Exceptions.OpaStructureException;
 import com.github.labai.opa.sys.Pool.ConnParams;
+import com.progress.open4gl.Open4GLException;
+import com.progress.open4gl.RunTimeProperties;
+import com.progress.open4gl.javaproxy.Connection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
-import java.util.function.Supplier;
 
 /**
  * @author Augustus
@@ -62,7 +63,7 @@ class JavaProxyAgent {
 		impl._release();
 	}
 
-	String runProc(Object opp, String procName, Supplier<String> requestIdProvider) throws Open4GLException, SQLException, OpaStructureException, OpaSessionTimeoutException {
+	RunResult runProc(Object opp, String procName, RequestIdProvider requestIdProvider) throws Open4GLException, SQLException, OpaStructureException, OpaSessionTimeoutException {
 		return impl.runProc(opp, procName, requestIdProvider);
 	}
 }

@@ -1,5 +1,6 @@
 package com.github.labai.opa.sys;
 
+import com.github.labai.opa.IntTestUtils;
 import com.github.labai.opa.Opa.IoDir;
 import com.github.labai.opa.Opa.OpaParam;
 import com.github.labai.opa.Opa.OpaProc;
@@ -9,6 +10,7 @@ import com.github.labai.opa.TestParams;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -33,20 +35,24 @@ public class I08AppModeTest {
 	}
 
 	@Test
+	@Ignore // need STATELESS server..
 	public void testDifferentServerModes() throws Exception {
-		OpaServer asStatefree = new OpaServer(TestParams.APP_SERVER, TestParams.APP_USER, TestParams.APP_PASSWORD, SessionModel.STATE_FREE);
-		OpaServer asStateless = new OpaServer(TestParams.APP_SERVER_STATELESS, TestParams.APP_USER, TestParams.APP_PASSWORD, SessionModel.STATELESS);
+		OpaServer asStatefree = IntTestUtils.createOpaServer(TestParams.APP_SERVER, SessionModel.STATE_FREE);
+		OpaServer asStateless = IntTestUtils.createOpaServer(TestParams.APP_SERVER_STATELESS, SessionModel.STATELESS);
 
 		HelloWorldOpp opp;
 		opp = new HelloWorldOpp();
 		opp.name = "Augustus";
-		asStatefree.runProc(opp, "jpx/test/opa/test_01_hello.p");
+		asStatefree.runProc(opp, "tests/opalib/test_01_hello.p");
 		Assert.assertEquals("Hello, Augustus!", opp.answer);
 
 		opp = new HelloWorldOpp();
 		opp.name = "Augustus";
-		asStateless.runProc(opp, "jpx/test/opa/test_01_hello.p");
+		asStateless.runProc(opp, "tests/opalib/test_01_hello.p");
 		Assert.assertEquals("Hello, Augustus!", opp.answer);
 
 	}
+
+
+
 }

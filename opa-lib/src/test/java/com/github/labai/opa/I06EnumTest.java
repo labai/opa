@@ -32,7 +32,7 @@ public class I06EnumTest extends IntTestBase {
 	}
 
 
-	@OpaProc(proc = "jpx/test/opa/test_06_enums.p")
+	@OpaProc(proc = "tests/opalib/test_06_enums.p")
 	public static class TableOutEnumOpp {
 		@OpaParam
 		public SampleEnum enumIn;

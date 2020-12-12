@@ -1,8 +1,9 @@
 package com.github.labai.opa.sys;
 
 import com.github.labai.opa.OpaServer.SessionModel;
+import com.github.labai.opa.sys.AppServer.ConnectionConfigurer;
+import com.github.labai.opa.sys.AppServer.RequestIdProvider;
 import com.progress.open4gl.Open4GLException;
-import com.progress.open4gl.javaproxy.Connection;
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
@@ -15,8 +16,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /**
  * @author Augustus
@@ -40,9 +39,9 @@ class Pool {
 		Boolean sslNoHostVerify;
 
 		// manual connection configurer
-		Consumer<Connection> connectionConfigurer;
+		ConnectionConfigurer connectionConfigurer;
 		// requestId provider (general for connection)
-		Supplier<String> requestIdGenerator;
+		RequestIdProvider requestIdGenerator;
 
 
 		public ConnParams(String urlString, String userId, String password, SessionModel sessionModel) {
@@ -83,12 +82,12 @@ class Pool {
 			connParams.sslNoHostVerify = value;
 		}
 
-		public void setConnectionConfigurer(Consumer<Connection> connConfigurer) {
+		public void setConnectionConfigurer(ConnectionConfigurer connConfigurer) {
 			ConnParams connParams = ((JpxConnFactory)super.getFactory()).connParams;
 			connParams.connectionConfigurer = connConfigurer;
 		}
 
-		public void setRequestIdGenerator(Supplier<String> requestIdGenerator) {
+		public void setRequestIdGenerator(RequestIdProvider requestIdGenerator) {
 			ConnParams connParams = ((JpxConnFactory)super.getFactory()).connParams;
 			connParams.requestIdGenerator = requestIdGenerator;
 		}

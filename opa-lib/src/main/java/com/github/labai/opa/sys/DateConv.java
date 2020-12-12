@@ -2,23 +2,18 @@ package com.github.labai.opa.sys;
 
 import com.github.labai.opa.Opa;
 import com.github.labai.opa.Opa.DataType;
-import com.progress.open4gl.DateHolder;
 import com.github.labai.opa.sys.Exceptions.OpaStructureException;
 import com.github.labai.opa.sys.TableUtils.ColDef;
+import com.progress.open4gl.DateHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.temporal.Temporal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 /**
  * @author Augustus
@@ -30,20 +25,46 @@ import java.util.GregorianCalendar;
 class DateConv {
 	private final static Logger logger = LoggerFactory.getLogger(Opa.class);
 
+	private final static List<IDateConvExt> extConverters = new ArrayList<IDateConvExt>();
+
+	interface IDateConvExt {
+		boolean isTypeOfDate(Class<?> type);
+		DataType guessAblType(Field field, DataType declaredDataType);
+		Object convProDate(Class<?> type, Date sqlDate);
+		Object convProDateTime(Class<?> type, GregorianCalendar cal);
+		Object convProDateTimeTz(Class<?> type, GregorianCalendar cal);
+		GregorianCalendar convToGregorian(Object value);
+	}
+
+	static void registerExtConverter(IDateConvExt conv) {
+		synchronized (extConverters) {
+			for (IDateConvExt c : extConverters) {
+				if (c.getClass().equals(conv.getClass()))
+					return;
+			}
+			extConverters.add(conv);
+		}
+	}
+
 
 	static boolean isTypeOfDate(Class<?> type) {
-		return Temporal.class.isAssignableFrom(type) || Date.class.isAssignableFrom(type);
+		if (Date.class.isAssignableFrom(type))
+			return true;
+		for (IDateConvExt conv : extConverters) {
+			if (conv.isTypeOfDate(type))
+				return true;
+		}
+		return false;
 	}
 
 	static DataType guessAblType(Field field, DataType declaredDataType) throws OpaStructureException {
 		Class<?> type = field.getType();
 
-		if (type == LocalDate.class)
-			return DataType.DATE;
-		if (type == LocalDateTime.class /*|| type == Instant.class*/)
-			return DataType.DATETIME;
-		if (type == OffsetDateTime.class /*||type == ZonedDateTime.class*/) // Zoned n/a in OE
-			return DataType.DATETIMETZ;
+		for (IDateConvExt conv : extConverters) {
+			DataType res = conv.guessAblType(field, declaredDataType);
+			if (res != null)
+				return res;
+		}
 
 		if (Date.class.isAssignableFrom(type)) {
 			switch(declaredDataType){
@@ -62,69 +83,75 @@ class DateConv {
 	static <T> void readProDate(ColDef colDef, T pojo, Date sqlDate) throws InvocationTargetException, IllegalAccessException {
 		if (sqlDate == null) {
 			colDef.setValue(pojo, null);
-		} else if (colDef.type == LocalDate.class) {
-			LocalDate localDate = Instant.ofEpochMilli(sqlDate.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
-			colDef.setValue(pojo, localDate);
-		} else { // Date
-			colDef.setValue(pojo, new Date(sqlDate.getTime()));
+			return;
 		}
+
+		for (IDateConvExt conv : extConverters) {
+			Object val = conv.convProDate(colDef.type, sqlDate);
+			if (val != null) {
+				colDef.setValue(pojo, val);
+				return;
+			}
+		}
+
+		// Date
+		colDef.setValue(pojo, new Date(sqlDate.getTime()));
+
 	}
 
 	static <T> void readProDateTime(ColDef colDef, T pojo, GregorianCalendar cal) throws InvocationTargetException, IllegalAccessException {
 		if (cal == null) {
 			colDef.setValue(pojo, null);
-		} else if (colDef.type == LocalDateTime.class) {
+			return;
+		}
+
+		for (IDateConvExt conv : extConverters) {
+			Object val = conv.convProDateTime(colDef.type, cal);
+			if (val != null) {
+				colDef.setValue(pojo, val);
+				return;
+			}
+		}
+
+/*
+		else if (colDef.type == LocalDateTime.class) {
 			LocalDateTime ldtm = cal.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 			colDef.setValue(pojo, ldtm);
-//		} else if (colDef.type == Instant.class) {
-//			colDef.setValue(pojo, cal.toInstant());
-		} else { // Date
-			colDef.setValue(pojo, cal.getTime());
 		}
+*/
+		// Date
+		colDef.setValue(pojo, cal.getTime());
+
 	}
 
 	static <T> void readProDateTimeTz(ColDef colDef, T pojo, GregorianCalendar cal) throws InvocationTargetException, IllegalAccessException {
 		if (cal == null) {
 			colDef.setValue(pojo, null);
-//		} else if (colDef.type == ZonedDateTime.class) { -- n/a in OE
-//			colDef.setValue(pojo, cal.toZonedDateTime());
-		} else if (colDef.type == OffsetDateTime.class) {
-			colDef.setValue(pojo, cal.toZonedDateTime().toOffsetDateTime());
-		} else { // Date
-			colDef.setValue(pojo, cal.getTime());
+			return;
 		}
+		for (IDateConvExt conv : extConverters) {
+			Object val = conv.convProDateTimeTz(colDef.type, cal);
+			if (val != null) {
+				colDef.setValue(pojo, val);
+				return;
+			}
+		}
+
+		// Date
+		colDef.setValue(pojo, cal.getTime());
 	}
 
 	// convert to GregorianCalendar
-	static GregorianCalendar convToProDate(Field field, Object bean) throws OpaStructureException, IllegalAccessException {
+	static GregorianCalendar convToGregorian(Field field, Object bean) throws OpaStructureException, IllegalAccessException {
 		Object value = field.get(bean);
 
 		if (value == null)
 			return null;
 
-		//Class<?> type = field.getType();
-		if (value instanceof LocalDate) {
-			LocalDate ldt = (LocalDate) value;
-			return GregorianCalendar.from(ldt.atStartOfDay(ZoneId.systemDefault()));
-		}
-
-		if (value instanceof LocalDateTime) {
-			LocalDateTime ldtm = (LocalDateTime) value;
-			return GregorianCalendar.from(ZonedDateTime.of(ldtm, ZoneId.systemDefault()));
-		}
-
-//		if (value instanceof Instant) {
-//			Instant instant = (Instant) value;
-//			return GregorianCalendar.from(ZonedDateTime.ofInstant(instant, ZoneId.systemDefault()));
-//		}
-
-//		if (value instanceof ZonedDateTime) { -- n/a in OE
-//			return GregorianCalendar.from((ZonedDateTime) value);
-//		}
-
-		if (value instanceof OffsetDateTime) {
-			OffsetDateTime odtm = (OffsetDateTime) value;
-			return GregorianCalendar.from(odtm.toZonedDateTime());
+		for (IDateConvExt conv : extConverters) {
+			GregorianCalendar val = conv.convToGregorian(value);
+			if (val != null)
+				return val;
 		}
 
 		if (value instanceof Date) {

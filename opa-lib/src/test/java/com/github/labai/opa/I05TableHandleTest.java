@@ -14,7 +14,7 @@ import java.util.List;
 
 public class I05TableHandleTest extends IntTestBase {
 
-	@OpaProc(proc = "jpx/test/opa/test_05_table_handle.p")
+	@OpaProc(proc = "tests/opalib/test_05_table_handle.p")
 	public static class TableHandleOpp {
 		@OpaParam
 		public String someId;
@@ -57,7 +57,7 @@ public class I05TableHandleTest extends IntTestBase {
 	private static class SampleTable2 {
 		@OpaField
 		public String charVal;
-		@OpaField (name = "intVal")
+		@OpaField(name = "intVal")
 		public Integer intValDiffFromOE; // must use field name from @OpaField(name)
 		@OpaField
 		public String fieldDoesNotExistsInOE = "AA"; // must ignore
@@ -69,7 +69,7 @@ public class I05TableHandleTest extends IntTestBase {
 	}
 
 
-	@OpaProc(proc="jpx/test/opa/test_05_table_handle.p")
+	@OpaProc(proc="tests/opalib/test_05_table_handle.p")
 	private static class TableHandle2Opp {
 		@OpaParam
 		public String someId;
@@ -77,10 +77,10 @@ public class I05TableHandleTest extends IntTestBase {
 		@OpaParam(table=SampleTable2.class, io= IoDir.OUT)
 		public List<SampleTable2> tt;
 
-		@OpaParam(io=IoDir.OUT)
+		@OpaParam(io= IoDir.OUT)
 		public String errorCode;
 
-		@OpaParam(io=IoDir.OUT)
+		@OpaParam(io= IoDir.OUT)
 		public String errorMessage;
 	}
 

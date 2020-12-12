@@ -4,8 +4,10 @@ import com.progress.open4gl.Parameter;
 import com.progress.open4gl.dynamicapi.ParameterSet;
 
 import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Augustus
@@ -84,6 +86,7 @@ public class Opa {
 	 * Class is ABL procedure parameters class
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
 	@Documented
 	public @interface OpaProc {
 		/**
@@ -96,6 +99,7 @@ public class Opa {
 	 * Parameter for ABL procedure
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.FIELD)
 	@Documented
 	public @interface OpaParam {
 		/**
@@ -115,6 +119,7 @@ public class Opa {
 	 * Class is an entity (temp-table)
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
 	@Documented
 	public @interface OpaTable {
 		/**
@@ -127,6 +132,7 @@ public class Opa {
 	 * Field is an entity field
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.FIELD)
 	@Documented
 	public @interface OpaField {
 		DataType dataType() default DataType.AUTO;
@@ -138,6 +144,7 @@ public class Opa {
 	 * Mark entity field as free (non Opa) field (in case of allowOmitOpaField)
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.FIELD)
 	@Documented
 	public @interface OpaTransient {
 	}

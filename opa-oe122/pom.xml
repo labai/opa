@@ -1,0 +1,132 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.github.labai</groupId>
+	<artifactId>opa-oe122</artifactId>
+	<version>1.4.2</version>
+	<packaging>jar</packaging>
+
+	<name>Opa for OE v12.2</name>
+	<description>Dependency collection for Opa for OpenEdge 12.2 version.
+		Includes Opa and required dependencies for OpenEdge 12.2
+		to use https connection
+	</description>
+	<url>https://github.com/labai/opa</url>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.github.labai</groupId>
+			<artifactId>opa</artifactId>
+			<version>1.4.2</version>
+		</dependency>
+
+		<!-- from OE OpenClient installation -->
+		<!-- o4glrt.jar from OpenEdge install dir must be provided.
+            They should be placed in maven repository (local) as maven artifact like this.
+
+            If you need slightly different version, then exclude these dependencies in pom and add correct ones
+        -->
+		<dependency>
+			<groupId>com.progress.openedge</groupId>
+			<artifactId>o4glrt</artifactId>
+			<version>12.2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.progress.openedge</groupId>
+			<artifactId>messages</artifactId>
+			<version>12.2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.progress.openedge</groupId>
+			<artifactId>oeauth</artifactId>
+			<version>12.2.0</version>
+		</dependency>
+
+		<!-- addition dependencies for o4glrt -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpcore</artifactId>
+			<version>4.4.12</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.5.10</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpasyncclient</artifactId>
+			<version>4.1.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpcore-nio</artifactId>
+			<version>4.4.12</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<version>1.13</version>
+		</dependency>
+
+	    <!-- scope: test -->
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.8.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.28</version>
+            <scope>test</scope>
+        </dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.0</version>
+				<configuration>
+					<source>${maven.compiler.source}</source>
+					<target>${maven.compiler.target}</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.0.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

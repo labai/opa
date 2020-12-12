@@ -2,21 +2,20 @@ package com.github.labai.opa.sys;
 
 import com.github.labai.opa.Opa;
 import com.github.labai.opa.OpaException;
+import com.github.labai.opa.OpaServer.RunResult;
 import com.github.labai.opa.OpaServer.SessionModel;
-import com.progress.open4gl.Open4GLException;
-import com.progress.open4gl.RunTime4GLException;
-import com.progress.open4gl.javaproxy.Connection;
 import com.github.labai.opa.sys.Exceptions.OpaSessionTimeoutException;
 import com.github.labai.opa.sys.Exceptions.OpaStructureException;
 import com.github.labai.opa.sys.Pool.ConnParams;
 import com.github.labai.opa.sys.Pool.JpxConnPool;
+import com.progress.open4gl.Open4GLException;
+import com.progress.open4gl.RunTime4GLException;
+import com.progress.open4gl.javaproxy.Connection;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /**
  * @author Augustus
@@ -28,11 +27,20 @@ public class AppServer {
 	private final static Logger logger = LoggerFactory.getLogger(Opa.class);
 
 	static final String PROGRESS_PROPS_KEY_SESSION_MODEL = "PROGRESS.Session.sessionModel";
+	static final String PROGRESS_PROPS_KEY_CONTEXT_ID = "PROGRESS.Session.ClientContextID";
 
 	private static final long DEFAULT_WAIT_TIMEOUT_MILIS = 30000L; // 30 s
 	private static final int DEFAULT_MAX_CONN = 10;
 
 	private JpxConnPool pool;
+
+	public interface RequestIdProvider {
+		String get();
+	}
+
+	public interface ConnectionConfigurer {
+		void accept(Connection conn);
+	}
 
 	public AppServer(String serverUrl, String userName, String password, SessionModel sessionModel) {
 		super();
@@ -46,7 +54,7 @@ public class AppServer {
 	// Remarks:
 	// - procName can be null (then proc name must be set in @OpaProc))
 	//
-	public void runProc(Object opp, String procName, Supplier<String> requestIdProvider) throws OpaException {
+	public RunResult runProc(Object opp, String procName, RequestIdProvider requestIdProvider) throws OpaException {
 		JavaProxyAgent jpx;
 		JavaProxyAgent jpx2 = null;
 		try {
@@ -57,8 +65,7 @@ public class AppServer {
 
 		try {
 			try {
-				jpx.runProc(opp, procName, requestIdProvider);
-				return;
+				return jpx.runProc(opp, procName, requestIdProvider);
 			} catch (OpaStructureException e) {
 				throw e;
 			} catch (RunTime4GLException e) {
@@ -66,8 +73,8 @@ public class AppServer {
 			} catch (SQLException e) {
 				throw new OpaException("4GL ResultSet error: " + e.getMessage(), e);
 			} catch (Open4GLException e) {
-				logger.debug("runProc(1) Open4GLException, will try again: {}", e.getMessage());
-				// can be connection problems - retry
+				// can happen due to network problems
+				throw new OpaException("Open4GL error: " + e.getMessage(), e);
 			} catch (OpaSessionTimeoutException e) {
 				logger.debug("runProc(1) OpaSessionTimeoutException, will try again: {}", e.getMessage());
 				// session timeout - retry
@@ -88,8 +95,7 @@ public class AppServer {
 			}
 
 			try {
-				jpx2.runProc(opp, procName, requestIdProvider);
-				return;
+				return jpx2.runProc(opp, procName, requestIdProvider);
 			} catch (RunTime4GLException e) {
 				throw new OpaException("4GL runtime error: " + e.getMessage(), e);
 			} catch (SQLException e) {
@@ -143,11 +149,11 @@ public class AppServer {
 	}
 
 	// manual connection configuration (function)
-	public void setConnectionConfigurer(Consumer<Connection> connConfigurer) {
+	public void setConnectionConfigurer(ConnectionConfigurer connConfigurer) {
 		pool.setConnectionConfigurer(connConfigurer);
 	}
 
-	public void setRequestIdGenerator(Supplier<String> requestIdGenerator) {
+	public void setRequestIdGenerator(RequestIdProvider requestIdGenerator) {
 		pool.setRequestIdGenerator(requestIdGenerator);
 	}
 

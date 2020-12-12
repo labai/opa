@@ -19,15 +19,20 @@ import java.math.BigDecimal;
  * Test max pool connections
  */
 //@Ignore
-public class I07PoolTest {
-	private static final String PROC_07_NAME = "jpx/test/opa/test_07_wait.p";
+public class I08PoolTest {
+	private static final String PROC_07_NAME = "tests/opalib/test_08_wait.p";
 
 	protected AppServer server;
 
 	@Before
 	public void init() {
 		Assume.assumeTrue("Is integration tests enabled?", TestParams.INT_TESTS_ENABLED);
+		String url = TestParams.APP_SERVER;
 		server = new AppServer(TestParams.APP_SERVER, TestParams.APP_USER, TestParams.APP_PASSWORD, SessionModel.STATE_FREE);
+		if (url.startsWith("https://")) {
+			String psccerts = Thread.currentThread().getContextClassLoader().getResource(TestParams.APP_PSCCERTS).getFile();
+			server.setCertificateStore(psccerts);
+		}
 	}
 
 	protected void log(String msg){

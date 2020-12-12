@@ -18,6 +18,7 @@
 
     <modules>
         <module>opa-lib</module>
+        <module>opa-oe122</module>
     </modules>
 
 

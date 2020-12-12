@@ -13,9 +13,6 @@ import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -23,7 +20,7 @@ import java.util.List;
 
 public class I03TableOutTest extends IntTestBase {
 
-	@OpaProc(proc = "jpx/test/opa/test_03_table_out.p")
+	@OpaProc(proc = "tests/opalib/test_03_table_out.p")
 	private static class TableOutOpp {
 		@OpaParam
 		private String someId;
@@ -116,12 +113,6 @@ public class I03TableOutTest extends IntTestBase {
 	}
 
 
-	@Test
-	public void testTableOutWithLocalDateTests() throws OpaException {
-		TableOutWithLocalDateTests.testTableOut(server);
-	}
-
-
 	//
 	// TableOut various tests
 	//
@@ -132,7 +123,7 @@ public class I03TableOutTest extends IntTestBase {
 	 */
 	private static class TableOutWithPrimitiveTests {
 
-		@OpaProc(proc = "jpx/test/opa/test_03_table_out.p")
+		@OpaProc(proc = "tests/opalib/test_03_table_out.p")
 		static class TableOutPrimitiveOpp {
 			@OpaParam
 			public String someId;
@@ -213,71 +204,11 @@ public class I03TableOutTest extends IntTestBase {
 	}
 
 	/**
-	 * for LocalDates
-	 */
-	private static class TableOutWithLocalDateTests {
-
-		@OpaProc(proc = "jpx/test/opa/test_03_table_out.p")
-		private static class TableOutOpp {
-			@OpaParam
-			private String someId;
-
-			@OpaParam(table = TableWithLocalDate.class, io = IoDir.OUT)
-			private List<TableWithLocalDate> tt;
-
-			@OpaParam(io = IoDir.OUT)
-			private String errorCode;
-
-			@OpaParam(io = IoDir.OUT)
-			private String errorMessage;
-		}
-
-		// with LocalDate
-		@OpaTable(allowOmitOpaField = true)
-		private static class TableWithLocalDate {
-			public String charVal;
-			public int intVal;
-			public long int64Val;
-			public BigDecimal decVal;
-			public LocalDate dateVal;
-			public boolean logVal;
-			public LocalDateTime tmVal;
-			public OffsetDateTime tmtzVal;
-			public Rowid rowid;
-			@OpaField(dataType = DataType.RECID)
-			public Long recid1;
-
-			@Override
-			public String toString() {
-				return this.dateVal + "|" + this.tmVal + "|" + this.tmtzVal;
-			}
-		}
-
-		static void testTableOut(OpaServer server) throws OpaException {
-
-			TableOutOpp opp = new TableOutOpp();
-			opp.someId = "00000038";
-			server.runProc(opp);
-
-			String s0 = "2014-02-15|2014-02-15T00:00|2014-02-15T00:00+02:00";
-			String s1 = "null|null|null";
-			String s2 = "2014-01-15|2014-01-15T00:00|2014-01-15T00:00+02:00";
-
-			Assert.assertEquals(s0, opp.tt.get(0).toString());
-			Assert.assertEquals(s1, opp.tt.get(1).toString());
-			Assert.assertEquals(s2, opp.tt.get(2).toString());
-
-			//log("TableOut ok");
-		}
-
-	}
-
-	/**
 	 * test fields mismatches
 	 */
 	private static class TableOutMismatchFields {
 
-		@OpaProc(proc = "jpx/test/opa/test_05_table_handle.p")
+		@OpaProc(proc = "tests/opalib/test_05_table_handle.p")
 		private static class TableOutTestDiffFieldOpp {
 			@OpaParam
 			public String someId;

@@ -1,7 +1,8 @@
 package com.github.labai.opa;
 
-import com.progress.open4gl.javaproxy.Connection;
 import com.github.labai.opa.sys.AppServer;
+import com.github.labai.opa.sys.DateConvJava8Ext;
+import com.progress.open4gl.javaproxy.Connection;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -13,6 +14,10 @@ public class OpaServer {
 
 	private AppServer appServer;
 
+	static {
+		DateConvJava8Ext.init();
+	}
+
 	public enum SessionModel {
 		STATELESS (0),
 		STATE_FREE (1);
@@ -20,6 +25,14 @@ public class OpaServer {
 		SessionModel(int id) {
 			this.progressId = id;
 		}
+	}
+
+	/**
+	 * additional info about call
+	*/
+	public interface RunResult {
+		String returnValue();
+		String requestId();
 	}
 
 	public OpaServer(String serverUrl, String userName, String password, SessionModel sessionModel) {
@@ -36,7 +49,7 @@ public class OpaServer {
 	}
 
 	public void runProc(Object opp, Supplier<String> requestIdProvider) throws OpaException {
-		appServer.runProc(opp, null, requestIdProvider);
+		appServer.runProc(opp, null, requestIdProvider::get);
 	}
 
 	/**
@@ -47,7 +60,7 @@ public class OpaServer {
 		appServer.runProc(opp, procName, null);
 	}
 	public void runProc(Object opp, String procName, Supplier<String> requestIdProvider) throws OpaException {
-		appServer.runProc(opp, procName, requestIdProvider);
+		appServer.runProc(opp, procName, requestIdProvider::get);
 	}
 
 	/** Set maximum pool size (maximum connections to OpenEdge AppServer). Default is 10 */
@@ -77,11 +90,11 @@ public class OpaServer {
 
 	/** Set connection configuration provider - for manual configuration */
 	public void setConnectionConfigurer(Consumer<Connection> connConfigurer) {
-		appServer.setConnectionConfigurer(connConfigurer);
+		appServer.setConnectionConfigurer(connConfigurer::accept);
 	}
 
 	public void setRequestIdGenerator(Supplier<String> requestIdGenerator) {
-		appServer.setRequestIdGenerator(requestIdGenerator);
+		appServer.setRequestIdGenerator(requestIdGenerator::get);
 	}
 
 }

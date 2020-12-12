@@ -1,5 +1,17 @@
 Version history
 
+1.4.2 (2020-12-10)
+- add @Target to @OpaField
+
+1.4.1 (2020-06-17)
+- use clientContextId for requestId
+
+1.4.0 (2020-06-11)
+- adapt to oe 12.2 https; add required dependencies
+
+1.3.1 (2020-04-15)
+- do not retry on Open4GLException
+
 1.3.0 (2019-11-19)
 - java8 (Java8 datetime data types)
 - opa exceptions will be runtime

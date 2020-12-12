@@ -1,9 +1,9 @@
 package com.github.labai.opa;
 
+import com.github.labai.opa.IntTestUtils.SampleTable;
 import com.github.labai.opa.Opa.IoDir;
 import com.github.labai.opa.Opa.OpaParam;
 import com.github.labai.opa.Opa.OpaProc;
-import com.github.labai.opa.IntTestUtils.SampleTable;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -14,25 +14,25 @@ import java.util.List;
 
 public class I04TableInOutTest extends IntTestBase {
 
-	@OpaProc(proc="jpx/test/opa/test_04_table_inout.p")
+	@OpaProc(proc="tests/opalib/test_04_table_inout.p")
 	static class TablesInOutOpp {
 		@OpaParam
 		public String someId;
 
 
-		@OpaParam(table=SampleTable.class, io=IoDir.OUT)
+		@OpaParam(table= SampleTable.class, io= IoDir.OUT)
 		public List<SampleTable> ttout;
 
-		@OpaParam(table=SampleTable.class, io=IoDir.INOUT)
+		@OpaParam(table= SampleTable.class, io= IoDir.INOUT)
 		public List<SampleTable> ttinout = new ArrayList<SampleTable>();;
 
-		@OpaParam(table=SampleTable.class, io=IoDir.IN)
+		@OpaParam(table= SampleTable.class, io= IoDir.IN)
 		public List<SampleTable> ttin = new ArrayList<SampleTable>();
 
-		@OpaParam(io=IoDir.OUT)
+		@OpaParam(io= IoDir.OUT)
 		public String errorCode;
 
-		@OpaParam(io=IoDir.OUT)
+		@OpaParam(io= IoDir.OUT)
 		public String errorMessage;
 	}
 

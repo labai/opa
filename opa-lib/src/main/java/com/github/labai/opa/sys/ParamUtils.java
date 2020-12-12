@@ -4,15 +4,28 @@ import com.github.labai.opa.Opa.DataType;
 import com.github.labai.opa.Opa.IoDir;
 import com.github.labai.opa.Opa.OpaParam;
 import com.github.labai.opa.Opa.OpaProc;
-import com.progress.open4gl.*;
-import com.progress.open4gl.dynamicapi.ParameterSet;
 import com.github.labai.opa.sys.Exceptions.OpaStructureException;
+import com.progress.open4gl.BigDecimalHolder;
+import com.progress.open4gl.BooleanHolder;
+import com.progress.open4gl.IntHolder;
+import com.progress.open4gl.LongHolder;
+import com.progress.open4gl.Memptr;
+import com.progress.open4gl.MemptrHolder;
+import com.progress.open4gl.Open4GLException;
+import com.progress.open4gl.ResultSetHolder;
+import com.progress.open4gl.Rowid;
+import com.progress.open4gl.RowidHolder;
+import com.progress.open4gl.StringHolder;
+import com.progress.open4gl.dynamicapi.ParameterSet;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.GregorianCalendar;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Augustus
@@ -84,7 +97,7 @@ class ParamUtils {
 		if (DateConv.isTypeOfDate(type)) {
 			GregorianCalendar cal = null;
 			if (pp.io() == IoDir.IN || pp.io() == IoDir.INOUT) {
-				cal = DateConv.convToProDate(field, bean);
+				cal = DateConv.convToGregorian(field, bean);
 			}
 			switch(DateConv.guessAblType(field, pp.dataType())){
 				case DATETIMETZ:
@@ -149,7 +162,7 @@ class ParamUtils {
 	 */
 	static Map<Field, ResultSetHolder> paramToBean(ParameterSet paramSet, Object bean) throws IllegalAccessException, Open4GLException, OpaStructureException, InvocationTargetException {
 
-		Map<Field, ResultSetHolder> rsMap = new LinkedHashMap<>();
+		Map<Field, ResultSetHolder> rsMap = new LinkedHashMap<Field, ResultSetHolder>();
 
 		List<Field> fields = getOpaFields(bean.getClass());
 
@@ -261,11 +274,13 @@ class ParamUtils {
 	}
 
 	private static List<Field> getOpaFields(Class<?> clazz) {
-		List<Field> fields = Arrays.stream(clazz.getDeclaredFields())
-				.filter(field -> field.getAnnotation(OpaParam.class) != null) // ignore free fields
-				.collect(Collectors.toList());
-		fields.forEach(field -> field.setAccessible(true));
-		return fields;
+		List<Field> result = new ArrayList<Field>();
+		for (Field f : clazz.getDeclaredFields()) {
+			if (f.getAnnotation(OpaParam.class) == null) continue;
+			f.setAccessible(true);
+			result.add(f);
+		}
+		return result;
 	}
 
 

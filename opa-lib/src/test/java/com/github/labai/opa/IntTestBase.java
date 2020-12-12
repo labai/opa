@@ -1,6 +1,5 @@
 package com.github.labai.opa;
 
-import com.github.labai.opa.OpaServer.SessionModel;
 import org.junit.Assume;
 import org.junit.Before;
 
@@ -15,7 +14,7 @@ public class IntTestBase {
 	@Before
 	public void init() {
 		Assume.assumeTrue("Are integration tests enabled?", TestParams.INT_TESTS_ENABLED);
-		server = new OpaServer(TestParams.APP_SERVER, TestParams.APP_USER, TestParams.APP_USER, SessionModel.STATE_FREE);
+		server = IntTestUtils.createOpaServer(TestParams.APP_SERVER);
 	}
 
 	protected void log(String msg) {
