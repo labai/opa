@@ -1,5 +1,13 @@
 Version history
 
+1.4.5 (2021-05-25)
+- cleanup idle connections after 4 minutes
+- add shutdown method
+- add timeout for _release()
+
+1.4.3 (2020-12-13)
+- allow custom field types (for temp-tables)
+
 1.4.2 (2020-12-10)
 - add @Target to @OpaField
 

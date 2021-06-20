@@ -162,7 +162,7 @@ class ParamUtils {
 	 */
 	static Map<Field, ResultSetHolder> paramToBean(ParameterSet paramSet, Object bean) throws IllegalAccessException, Open4GLException, OpaStructureException, InvocationTargetException {
 
-		Map<Field, ResultSetHolder> rsMap = new LinkedHashMap<Field, ResultSetHolder>();
+		Map<Field, ResultSetHolder> rsMap = new LinkedHashMap<>();
 
 		List<Field> fields = getOpaFields(bean.getClass());
 
@@ -269,12 +269,12 @@ class ParamUtils {
 
 
 	static String getProcName(Class<?> clazz) {
-		OpaProc ap = (OpaProc) clazz.getAnnotation(OpaProc.class);
+		OpaProc ap = clazz.getAnnotation(OpaProc.class);
 		return ap.proc();
 	}
 
 	private static List<Field> getOpaFields(Class<?> clazz) {
-		List<Field> result = new ArrayList<Field>();
+		List<Field> result = new ArrayList<>();
 		for (Field f : clazz.getDeclaredFields()) {
 			if (f.getAnnotation(OpaParam.class) == null) continue;
 			f.setAccessible(true);

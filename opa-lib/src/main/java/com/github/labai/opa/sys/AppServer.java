@@ -32,7 +32,7 @@ public class AppServer {
 	private static final long DEFAULT_WAIT_TIMEOUT_MILIS = 30000L; // 30 s
 	private static final int DEFAULT_MAX_CONN = 10;
 
-	private JpxConnPool pool;
+	private final JpxConnPool pool;
 
 	public interface RequestIdProvider {
 		String get();
@@ -51,6 +51,11 @@ public class AppServer {
 		pool = new JpxConnPool(connParams, poolConfig);
 	}
 
+	public void shutdown() {
+		pool.shutdown();
+		logger.debug("Finished opaServer shutdown");
+	}
+
 	// Remarks:
 	// - procName can be null (then proc name must be set in @OpaProc))
 	//
@@ -58,7 +63,7 @@ public class AppServer {
 		JavaProxyAgent jpx;
 		JavaProxyAgent jpx2 = null;
 		try {
-			jpx = (JavaProxyAgent) pool.borrowObject();
+			jpx = pool.borrowObject();
 		} catch (Exception ex) {
 			throw new OpaException("Cannot get connection from pool", ex);
 		}
@@ -89,7 +94,7 @@ public class AppServer {
 
 			// retry
 			try {
-				jpx2 = (JavaProxyAgent) pool.borrowObject();
+				jpx2 = pool.borrowObject();
 			} catch (Exception e) {
 				throw new OpaException("Cannot restart connection in pool", e);
 			}

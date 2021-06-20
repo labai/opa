@@ -38,6 +38,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * @author Augustus
@@ -85,12 +86,12 @@ class TableUtils {
 		final DataType ablType;
 		final Class<?> type;
 		final Method setter;
-		ColDef(Field field, Class<T> clazz, boolean ignoreSetters) throws OpaStructureException {
+		ColDef(Field field, Class<T> pojoClass, boolean ignoreSetters) throws OpaStructureException {
 			this.field = field;
 			this.type = field.getType();
 			this.ablType = guessAblType(field);
 			if (!ignoreSetters) {
-				this.setter = getSetter(field, clazz);
+				this.setter = getSetter(field, pojoClass);
 				if (this.setter != null)
 					this.setter.setAccessible(true); // if not set, then class expecting to be public also
 			} else {
@@ -109,10 +110,8 @@ class TableUtils {
 			try {
 				String nm = field.getName();
 				return clazz.getMethod("set" + nm.substring(0, 1).toUpperCase() + nm.substring(1), field.getType());
-			} catch (SecurityException e) {
+			} catch (SecurityException | NoSuchMethodException e) {
 				return null; // will ignore if can't access
-			} catch (NoSuchMethodException ignoreMe) {
-				return null;
 			}
 		}
 	}
@@ -187,7 +186,7 @@ class TableUtils {
 		return columnNames;
 	}
 
-	private static <T> void assignColumnToField(ResultSet resultSet, ColDef colDef, T bean, String columnName) throws SQLException, InvocationTargetException, IllegalAccessException {
+	private static <T> void assignColumnToField(ResultSet resultSet, ColDef<T> colDef, T bean, String columnName) throws SQLException, InvocationTargetException, IllegalAccessException {
 		Class<?> type = colDef.type;
 		if (type == long.class) {
 			String s = resultSet.getString(columnName);
@@ -277,6 +276,14 @@ class TableUtils {
 			}
 			return;
 		}
+
+		Function<String, ?> convFn = _OpaDataConvUtils.getConverterToPojoField(colDef.type, colDef.ablType);
+		if (convFn != null) {
+			String s = resultSet.getString(columnName);
+			colDef.setValue(bean, convFn.apply(s));
+			return;
+		}
+
 		// clear
 		//resultSet.getObject(columnName);
 		return;
@@ -348,6 +355,9 @@ class TableUtils {
 		return DataType.AUTO;
 	}
 
+	// if field type unambiguously maps to abl dataType, then use this map (ignore annotation),
+	// annotation is used only if field type to abl dataType
+	// is ambiguous (e.g. Date -> date/timestamp)
 	private static DataType guessAblType(Field field) throws OpaStructureException {
 		Class<?> type = field.getType();
 		if (Long.class.isAssignableFrom(type) || type == long.class) {
@@ -375,15 +385,17 @@ class TableUtils {
 			return DataType.CHARACTER;
 
 		} else if (type.getSimpleName().equals("byte[]")) {
-			//} else if (byte.class == type && type.isArray()) {
 			DataType datatype = declaredDataType(field);
-			switch(datatype) {
+			switch (datatype) {
 				case BLOB:
 					return DataType.BLOB;
 				default: // RAW?
-					throw new OpaStructureException("DataType.BLOB is required in OpaField annotation for 'byte[]' field '"+ field.getName() +"'");
+					throw new OpaStructureException("DataType.BLOB is required in OpaField annotation for 'byte[]' field '" + field.getName() + "'");
 			}
 		} else {
+			DataType dataType = _OpaDataConvUtils.getAblType(type, declaredDataType(field));
+			if (dataType != null)
+				return dataType;
 			throw new OpaStructureException("Invalid field type (field=" + field.getName() +" type=" +field.getType().getSimpleName() + ")");
 		}
 	}
@@ -456,7 +468,7 @@ class TableUtils {
 		}
 
 		private static List<Object> beanToList (Object bean) throws IllegalArgumentException, IllegalAccessException, OpaStructureException {
-			List<Object> row = new ArrayList<Object>();
+			List<Object> row = new ArrayList<>();
 			Class<?> clazz = bean.getClass();
 			boolean allowOmitOpaField = clazz.getAnnotation(OpaTable.class).allowOmitOpaField();
 
@@ -467,12 +479,21 @@ class TableUtils {
 				Class<?> type = field.getType();
 				if (DateConv.isTypeOfDate(type)) {
 					row.add(DateConv.convToGregorian(field, bean));
-				} else if (type.isEnum()) { // enum as char
+					continue;
+				}
+				if (type.isEnum()) { // enum as char
 					String sval = field.get(bean).toString();
 					row.add(sval);
-				} else {
-					row.add(field.get(bean)); // other types - as is
+					continue;
 				}
+				Function convFn = _OpaDataConvUtils.getConverterToAblColumn(type, declaredDataType(field));
+				if (convFn != null) {
+					Object pojoVal = field.get(bean);
+					Object value = convFn.apply(pojoVal);
+					row.add(value);
+					continue;
+				}
+				row.add(field.get(bean)); // other types - as is
 			}
 			return row;
 		}

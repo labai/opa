@@ -25,7 +25,7 @@ import java.util.List;
 class DateConv {
 	private final static Logger logger = LoggerFactory.getLogger(Opa.class);
 
-	private final static List<IDateConvExt> extConverters = new ArrayList<IDateConvExt>();
+	private final static List<IDateConvExt> extConverters = new ArrayList<>();
 
 	interface IDateConvExt {
 		boolean isTypeOfDate(Class<?> type);
@@ -175,7 +175,7 @@ class DateConv {
 			return;
 		}
 
-		ColDef<T> colDef = new ColDef<T>(field, (Class<T>)pojo.getClass(), true);
+		ColDef<T> colDef = new ColDef<>(field, (Class<T>) pojo.getClass(), true);
 
 		switch (guessAblType(field, colDef.ablType)) {
 			case DATE:

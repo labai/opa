@@ -23,7 +23,7 @@ import java.sql.SQLException;
  */
 class JavaProxyAgent {
 	private final static Logger logger = LoggerFactory.getLogger(JavaProxyAgent.class);
-	private JavaProxyImpl impl;
+	private final JavaProxyImpl impl;
 
 	JavaProxyAgent(ConnParams connParams) throws Open4GLException {
 		// we must do this here before we attempt to create the appobject
@@ -67,4 +67,3 @@ class JavaProxyAgent {
 		return impl.runProc(opp, procName, requestIdProvider);
 	}
 }
-

@@ -12,7 +12,7 @@ import java.util.function.Supplier;
  */
 public class OpaServer {
 
-	private AppServer appServer;
+	private final AppServer appServer;
 
 	static {
 		DateConvJava8Ext.init();
@@ -37,6 +37,10 @@ public class OpaServer {
 
 	public OpaServer(String serverUrl, String userName, String password, SessionModel sessionModel) {
 		appServer = new AppServer(serverUrl, userName, password, sessionModel);
+	}
+
+	public void shutdown() {
+		appServer.shutdown();
 	}
 
 	/**
@@ -73,7 +77,7 @@ public class OpaServer {
 		appServer.setConnectionTimeout(timeoutMs);
 	}
 
-	/** Set connection time-to-live in seconds. Default is 298s (4:58) */
+	/** Set connection time-to-live in seconds. Default is 238s (3:58) */
 	public void setConnectionTTLSec(int ttlInSec) {
 		appServer.setConnectionTTLSec(ttlInSec);
 	}

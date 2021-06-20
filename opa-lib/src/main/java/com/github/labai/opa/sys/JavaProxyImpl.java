@@ -78,12 +78,10 @@ class JavaProxyImpl extends AppObject {
 
 		// assign results (ordinary params) to bean; return rsmap - list of resultSets, which will be filled later
 		//
-		Map<Field, ResultSetHolder> rsmap = null;
+		Map<Field, ResultSetHolder> rsmap;
 		try {
 			rsmap = ParamUtils.paramToBean(paramSet, opp);
-		} catch (IllegalAccessException e) {
-			throw new OpaStructureException("Error while assigning params to bean", e);
-		} catch (InvocationTargetException e) {
+		} catch (IllegalAccessException | InvocationTargetException e) {
 			throw new OpaStructureException("Error while assigning params to bean", e);
 		}
 
@@ -149,9 +147,7 @@ class JavaProxyImpl extends AppObject {
 			this.returnValue = returnValue;
 			this.requestId = requestId;
 		}
-		@Override
-        public String returnValue() { return returnValue; }
-		@Override
-        public String requestId() { return requestId; }
+		@Override public String returnValue() { return returnValue; }
+		@Override public String requestId() { return requestId; }
 	}
 }

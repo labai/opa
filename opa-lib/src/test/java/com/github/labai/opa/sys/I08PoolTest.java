@@ -6,12 +6,14 @@ import com.github.labai.opa.Opa.OpaProc;
 import com.github.labai.opa.OpaException;
 import com.github.labai.opa.OpaServer.SessionModel;
 import com.github.labai.opa.TestParams;
-import org.junit.Assert;
+import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by Augustus on 2014.12.18.
@@ -26,13 +28,18 @@ public class I08PoolTest {
 
 	@Before
 	public void init() {
-		Assume.assumeTrue("Is integration tests enabled?", TestParams.INT_TESTS_ENABLED);
+		Assume.assumeTrue("Are integration tests enabled?", TestParams.INT_TESTS_ENABLED);
 		String url = TestParams.APP_SERVER;
 		server = new AppServer(TestParams.APP_SERVER, TestParams.APP_USER, TestParams.APP_PASSWORD, SessionModel.STATE_FREE);
 		if (url.startsWith("https://")) {
 			String psccerts = Thread.currentThread().getContextClassLoader().getResource(TestParams.APP_PSCCERTS).getFile();
 			server.setCertificateStore(psccerts);
 		}
+	}
+
+	@After
+	public void cleanup() {
+		server.shutdown();
 	}
 
 	protected void log(String msg){
@@ -48,7 +55,7 @@ public class I08PoolTest {
 		@OpaParam(io= IoDir.OUT)
 		public String errorCode;
 
-		@OpaParam(io=IoDir.OUT)
+		@OpaParam(io= IoDir.OUT)
 		public String errorMessage;
 	}
 
@@ -71,8 +78,8 @@ public class I08PoolTest {
 			t3.join(600);
 		}
 
-		Assert.assertEquals(0, server.getPool().getNumActive());
-		Assert.assertEquals(2, server.getPool().getNumIdle()); // 2 idle connections - limited by pool
+		assertEquals(0, server.getPool().getNumActive());
+		assertEquals(2, server.getPool().getNumIdle()); // 2 idle connections - limited by pool
 	}
 
 	@Test
@@ -91,8 +98,8 @@ public class I08PoolTest {
 			t3.join(600);
 		}
 
-		Assert.assertEquals(0, server.getPool().getNumActive());
-		Assert.assertEquals(3, server.getPool().getNumIdle()); // 3 idle connections - was max at 1 time
+		assertEquals(0, server.getPool().getNumActive());
+		assertEquals(3, server.getPool().getNumIdle()); // 3 idle connections - was max at 1 time
 
 	}
 
@@ -113,8 +120,8 @@ public class I08PoolTest {
 			t3.join(600);
 		}
 
-		Assert.assertEquals(0, server.getPool().getNumActive());
-		Assert.assertEquals(3, server.getPool().getNumIdle()); // 3 idle connections - was max at 1 time
+		assertEquals(0, server.getPool().getNumActive());
+		assertEquals(3, server.getPool().getNumIdle()); // 3 idle connections - was max at 1 time
 
 		Thread.sleep(500);
 
@@ -126,25 +133,34 @@ public class I08PoolTest {
 		}
 
 		// expect to be closed all expired and new 1 created
-		Assert.assertEquals(1, server.getPool().getNumIdle());
+		assertEquals(1, server.getPool().getNumIdle());
 
 	}
 
+	@Test
+	public void testShutdown() {
+
+		createRunnable("0.1").run();
+		assertEquals(1, server.getPool().getNumIdle());
+		server.shutdown();
+		assertEquals(0, server.getPool().getNumIdle());
+	}
 
 	private Runnable createRunnable() {
-		return new Runnable(){
-			@Override
-			public void run() {
-				try {
-					log(Thread.currentThread().getName() + " starting thread, will do job 1s. Pool before: busy=" + server.getPool().getNumActive() + " idle=" + server.getPool().getNumIdle());
-					WaitOpp opp1 = new WaitOpp();
-					opp1.waitSec = new BigDecimal("1");
-					server.runProc(opp1, PROC_07_NAME, null);
-					log(Thread.currentThread().getName() + " thread done. Pool after: busy=" + server.getPool().getNumActive() + " idle=" + server.getPool().getNumIdle());
-				} catch (OpaException e) {
-					log(Thread.currentThread().getName() + " OpaException: " + e.getMessage());
-					e.printStackTrace();
-				}
+		return createRunnable("1");
+	}
+
+	private Runnable createRunnable(String waitSec) {
+		return () -> {
+			try {
+				log(Thread.currentThread().getName() + " starting thread, will do job 1s. Pool before: busy=" + server.getPool().getNumActive() + " idle=" + server.getPool().getNumIdle());
+				WaitOpp opp1 = new WaitOpp();
+				opp1.waitSec = new BigDecimal(waitSec);
+				server.runProc(opp1, PROC_07_NAME, null);
+				log(Thread.currentThread().getName() + " thread done. Pool after: busy=" + server.getPool().getNumActive() + " idle=" + server.getPool().getNumIdle());
+			} catch (OpaException e) {
+				log(Thread.currentThread().getName() + " OpaException: " + e.getMessage());
+				e.printStackTrace();
 			}
 		};
 	}
