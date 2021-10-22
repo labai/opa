@@ -3,7 +3,7 @@
 
     <groupId>com.github.labai</groupId>
     <artifactId>opa</artifactId>
-    <version>1.4.3-SNAPSHOT</version>
+    <version>1.4.5</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -53,7 +53,7 @@
         <dependency>
             <groupId>com.progress.openedge</groupId>
             <artifactId>o4glrt</artifactId>
-            <version>11.7.4</version>
+            <version>12.0</version>
             <scope>provided</scope>
             <!-- o4glrt.jar from OpenEdge install dir must be provided.
                 TIP: it can be placed somewhere in maven repository (local) as maven artifact like this.
