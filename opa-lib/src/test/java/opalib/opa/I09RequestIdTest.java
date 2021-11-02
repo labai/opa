@@ -1,8 +1,8 @@
 package opalib.opa;
 
-import opalib.opa.Opa.IoDir;
-import opalib.opa.Opa.OpaParam;
-import opalib.opa.Opa.OpaProc;
+import opalib.api.IoDir;
+import opalib.api.OpaParam;
+import opalib.api.OpaProc;
 
 /**
  * Created by Augustus on 2019.11.19.

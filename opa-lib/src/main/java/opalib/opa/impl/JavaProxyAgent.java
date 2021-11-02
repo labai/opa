@@ -1,13 +1,13 @@
 package opalib.opa.impl;
 
-import opalib.opa.OpaServer.RunResult;
-import opalib.opa.impl.AppServer.RequestIdProvider;
-import opalib.opa.impl.Exceptions.OpaSessionTimeoutException;
-import opalib.opa.impl.Exceptions.OpaStructureException;
-import opalib.opa.impl.Pool.ConnParams;
 import com.progress.open4gl.Open4GLException;
 import com.progress.open4gl.RunTimeProperties;
 import com.progress.open4gl.javaproxy.Connection;
+import opalib.api.OpaStructureException;
+import opalib.opa.OpaServer.RunResult;
+import opalib.opa.impl.AppServer.RequestIdProvider;
+import opalib.opa.impl.Exceptions.OpaSessionTimeoutException;
+import opalib.opa.impl.Pool.ConnParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,3 +67,4 @@ class JavaProxyAgent {
 		return impl.runProc(opp, procName, requestIdProvider);
 	}
 }
+

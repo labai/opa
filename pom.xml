@@ -17,6 +17,7 @@
 
 
     <modules>
+        <module>opa-api</module>
         <module>opa-lib</module>
         <module>opa-oe122</module>
     </modules>

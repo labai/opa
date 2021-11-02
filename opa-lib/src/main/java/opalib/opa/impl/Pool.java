@@ -1,9 +1,9 @@
 package opalib.opa.impl;
 
+import com.progress.open4gl.Open4GLException;
 import opalib.opa.OpaServer.SessionModel;
 import opalib.opa.impl.AppServer.ConnectionConfigurer;
 import opalib.opa.impl.AppServer.RequestIdProvider;
-import com.progress.open4gl.Open4GLException;
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
@@ -69,7 +69,7 @@ class Pool {
 	 */
 	public static class JpxConnPool extends GenericObjectPool<JavaProxyAgent> {
 
-		public JpxConnPool(ConnParams connParams, GenericObjectPoolConfig poolConfig) {
+		public JpxConnPool(ConnParams connParams, GenericObjectPoolConfig<JavaProxyAgent> poolConfig) {
 			super(new JpxConnFactory(connParams), poolConfig);
 			this.setTestOnBorrow(true);
 			this.setTestWhileIdle(true);

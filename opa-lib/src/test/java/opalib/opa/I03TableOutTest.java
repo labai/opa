@@ -1,13 +1,14 @@
 package opalib.opa;
 
-import opalib.opa.IntTestUtils.SampleTable;
-import opalib.opa.Opa.DataType;
-import opalib.opa.Opa.IoDir;
-import opalib.opa.Opa.OpaField;
-import opalib.opa.Opa.OpaParam;
-import opalib.opa.Opa.OpaProc;
-import opalib.opa.Opa.OpaTable;
 import com.progress.open4gl.Rowid;
+import opalib.api.DataType;
+import opalib.api.IoDir;
+import opalib.api.OpaException;
+import opalib.api.OpaField;
+import opalib.api.OpaParam;
+import opalib.api.OpaProc;
+import opalib.api.OpaTable;
+import opalib.opa.IntTestUtils.SampleTable;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -139,7 +140,7 @@ public class I03TableOutTest extends IntTestBase {
 		}
 
 		// with primitive data types (int, long, boolean) - null should be converted to 0/false
-		@OpaTable
+		@OpaTable(allowOmitOpaField = false)
 		static class TableOutPrimitive {
 			@OpaField
 			public String charVal;

@@ -1,10 +1,11 @@
 package opalib.opa;
 
-import opalib.opa.Opa.DataType;
-import opalib.opa.Opa.IoDir;
-import opalib.opa.Opa.OpaParam;
-import opalib.opa.Opa.OpaProc;
 import com.progress.open4gl.Rowid;
+import opalib.api.DataType;
+import opalib.api.IoDir;
+import opalib.api.OpaException;
+import opalib.api.OpaParam;
+import opalib.api.OpaProc;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -31,11 +32,11 @@ public class I02SimpleParamsTest extends IntTestBase {
 		public Date dateVal1;
 		@OpaParam
 		public Boolean logVal1;
-		@OpaParam(dataType= DataType.DATETIME)
+		@OpaParam(dataType=DataType.DATETIME)
 		public Date tmVal1;
-		@OpaParam(dataType= DataType.DATETIMETZ)
+		@OpaParam(dataType=DataType.DATETIMETZ)
 		public Date tmtzVal1;
-		@OpaParam(dataType= DataType.LONGCHAR)
+		@OpaParam(dataType=DataType.LONGCHAR)
 		public String longChar1;
 		@OpaParam
 		public Rowid rowid1;
@@ -45,47 +46,47 @@ public class I02SimpleParamsTest extends IntTestBase {
 		// output
 		@OpaParam(io= IoDir.OUT)
 		public String charVal2;
-		@OpaParam(io= IoDir.OUT)
+		@OpaParam(io=IoDir.OUT)
 		public Integer intVal2;
-		@OpaParam(io= IoDir.OUT)
+		@OpaParam(io=IoDir.OUT)
 		public Long int64Val2;
-		@OpaParam(io= IoDir.OUT)
+		@OpaParam(io=IoDir.OUT)
 		public BigDecimal decVal2;
-		@OpaParam(io= IoDir.OUT, dataType= DataType.DATE)
+		@OpaParam(io=IoDir.OUT, dataType=DataType.DATE)
 		public Date dateVal2;
-		@OpaParam(io= IoDir.OUT)
+		@OpaParam(io=IoDir.OUT)
 		public Boolean logVal2;
-		@OpaParam(io= IoDir.OUT, dataType= DataType.DATETIME)
+		@OpaParam(io=IoDir.OUT, dataType=DataType.DATETIME)
 		public Date tmVal2;
-		@OpaParam(io= IoDir.OUT, dataType= DataType.DATETIMETZ)
+		@OpaParam(io=IoDir.OUT, dataType=DataType.DATETIMETZ)
 		public Date tmtzVal2;
-		@OpaParam(io= IoDir.OUT, dataType= DataType.LONGCHAR)
+		@OpaParam(io=IoDir.OUT, dataType=DataType.LONGCHAR)
 		public String longChar2;
-		@OpaParam(io= IoDir.OUT)
+		@OpaParam(io=IoDir.OUT)
 		public Rowid rowid2;
 		// @OpaParam(io=IoDir.OUT)
 		// public byte[] raw2;
 
 		// input-output
-		@OpaParam(io= IoDir.INOUT)
+		@OpaParam(io=IoDir.INOUT)
 		public String charVal3;
-		@OpaParam(io= IoDir.INOUT)
+		@OpaParam(io=IoDir.INOUT)
 		public Integer intVal3;
-		@OpaParam(io= IoDir.INOUT)
+		@OpaParam(io=IoDir.INOUT)
 		public Long int64Val3;
-		@OpaParam(io= IoDir.INOUT)
+		@OpaParam(io=IoDir.INOUT)
 		public BigDecimal decVal3;
-		@OpaParam(io= IoDir.INOUT, dataType= DataType.DATE)
+		@OpaParam(io=IoDir.INOUT, dataType=DataType.DATE)
 		public Date dateVal3;
-		@OpaParam(io= IoDir.INOUT)
+		@OpaParam(io=IoDir.INOUT)
 		public Boolean logVal3;
-		@OpaParam(io= IoDir.INOUT, dataType= DataType.DATETIME)
+		@OpaParam(io=IoDir.INOUT, dataType=DataType.DATETIME)
 		public Date tmVal3;
-		@OpaParam(io= IoDir.INOUT, dataType= DataType.DATETIMETZ)
+		@OpaParam(io=IoDir.INOUT, dataType=DataType.DATETIMETZ)
 		public Date tmtzVal3;
-		@OpaParam(io= IoDir.INOUT, dataType= DataType.LONGCHAR)
+		@OpaParam(io=IoDir.INOUT, dataType=DataType.LONGCHAR)
 		public String longChar3;
-		@OpaParam(io= IoDir.INOUT)
+		@OpaParam(io=IoDir.INOUT)
 		public Rowid rowid3;
 		// @OpaParam(io=IoDir.INOUT)
 		// public byte[] raw3;

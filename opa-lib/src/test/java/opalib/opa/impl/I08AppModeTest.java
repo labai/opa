@@ -1,9 +1,9 @@
 package opalib.opa.impl;
 
 import opalib.opa.IntTestUtils;
-import opalib.opa.Opa.IoDir;
-import opalib.opa.Opa.OpaParam;
-import opalib.opa.Opa.OpaProc;
+import opalib.api.IoDir;
+import opalib.api.OpaParam;
+import opalib.api.OpaProc;
 import opalib.opa.OpaServer;
 import opalib.opa.OpaServer.SessionModel;
 import opalib.opa.TestParams;

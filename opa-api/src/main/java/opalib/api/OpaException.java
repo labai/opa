@@ -1,4 +1,4 @@
-package opalib.opa;
+package opalib.api;
 
 /**
  * @author Augustus

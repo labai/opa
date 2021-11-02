@@ -1,11 +1,12 @@
 package opalib.opa;
 
+import opalib.api.IoDir;
+import opalib.api.OpaException;
+import opalib.api.OpaField;
+import opalib.api.OpaParam;
+import opalib.api.OpaProc;
+import opalib.api.OpaTable;
 import opalib.opa.IntTestUtils.SampleTable;
-import opalib.opa.Opa.IoDir;
-import opalib.opa.Opa.OpaField;
-import opalib.opa.Opa.OpaParam;
-import opalib.opa.Opa.OpaProc;
-import opalib.opa.Opa.OpaTable;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -57,7 +58,7 @@ public class I05TableHandleTest extends IntTestBase {
 	private static class SampleTable2 {
 		@OpaField
 		public String charVal;
-		@OpaField(name = "intVal")
+		@OpaField (name = "intVal")
 		public Integer intValDiffFromOE; // must use field name from @OpaField(name)
 		@OpaField
 		public String fieldDoesNotExistsInOE = "AA"; // must ignore
@@ -77,10 +78,10 @@ public class I05TableHandleTest extends IntTestBase {
 		@OpaParam(table=SampleTable2.class, io= IoDir.OUT)
 		public List<SampleTable2> tt;
 
-		@OpaParam(io= IoDir.OUT)
+		@OpaParam(io=IoDir.OUT)
 		public String errorCode;
 
-		@OpaParam(io= IoDir.OUT)
+		@OpaParam(io=IoDir.OUT)
 		public String errorMessage;
 	}
 

@@ -1,8 +1,9 @@
 package opalib.opa;
 
-import opalib.opa.Opa.IoDir;
-import opalib.opa.Opa.OpaParam;
-import opalib.opa.Opa.OpaProc;
+import opalib.api.OpaException;
+import opalib.api.IoDir;
+import opalib.api.OpaParam;
+import opalib.api.OpaProc;
 import org.junit.Assert;
 import org.junit.Test;
 

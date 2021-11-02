@@ -1,12 +1,12 @@
 package opalib.opa;
 
-import opalib.opa.Opa.DataType;
-import opalib.opa.Opa.IoDir;
-import opalib.opa.Opa.OpaField;
-import opalib.opa.Opa.OpaParam;
-import opalib.opa.Opa.OpaProc;
-import opalib.opa.Opa.OpaTable;
 import com.progress.open4gl.Rowid;
+import opalib.api.DataType;
+import opalib.api.IoDir;
+import opalib.api.OpaField;
+import opalib.api.OpaParam;
+import opalib.api.OpaProc;
+import opalib.api.OpaTable;
 import org.junit.Test;
 
 import java.math.BigDecimal;

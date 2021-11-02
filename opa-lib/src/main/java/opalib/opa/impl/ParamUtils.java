@@ -1,10 +1,5 @@
 package opalib.opa.impl;
 
-import opalib.opa.Opa.DataType;
-import opalib.opa.Opa.IoDir;
-import opalib.opa.Opa.OpaParam;
-import opalib.opa.Opa.OpaProc;
-import opalib.opa.impl.Exceptions.OpaStructureException;
 import com.progress.open4gl.BigDecimalHolder;
 import com.progress.open4gl.BooleanHolder;
 import com.progress.open4gl.IntHolder;
@@ -17,9 +12,15 @@ import com.progress.open4gl.Rowid;
 import com.progress.open4gl.RowidHolder;
 import com.progress.open4gl.StringHolder;
 import com.progress.open4gl.dynamicapi.ParameterSet;
+import opalib.api.DataType;
+import opalib.api.IoDir;
+import opalib.api.OpaParam;
+import opalib.api.OpaProc;
+import opalib.api.OpaStructureException;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
@@ -58,7 +59,7 @@ class ParamUtils {
 	private static void fieldToParam(Object bean, Field field, ParameterSet paramSet, int iPos) throws Open4GLException, IllegalAccessException {
 		OpaParam pp = field.getAnnotation(OpaParam.class);
 		Class<?> type = field.getType();
-		int ioId = pp.io().progressId;
+		int ioId = ProMap.getProgressId(pp.io());
 
 		if (String.class.isAssignableFrom(type)) {
 			String str = null;
@@ -277,6 +278,7 @@ class ParamUtils {
 		List<Field> result = new ArrayList<>();
 		for (Field f : clazz.getDeclaredFields()) {
 			if (f.getAnnotation(OpaParam.class) == null) continue;
+			if (f.isSynthetic() || Modifier.isStatic(f.getModifiers())) continue;
 			f.setAccessible(true);
 			result.add(f);
 		}

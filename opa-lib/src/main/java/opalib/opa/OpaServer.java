@@ -1,8 +1,9 @@
 package opalib.opa;
 
+import com.progress.open4gl.javaproxy.Connection;
+import opalib.api.OpaException;
 import opalib.opa.impl.AppServer;
 import opalib.opa.impl.DateConvJava8Ext;
-import com.progress.open4gl.javaproxy.Connection;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;

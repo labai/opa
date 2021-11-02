@@ -1,10 +1,9 @@
 package opalib.opa.impl;
 
-import opalib.opa.Opa;
-import opalib.opa.Opa.DataType;
-import opalib.opa.impl.Exceptions.OpaStructureException;
-import opalib.opa.impl.TableUtils.ColDef;
 import com.progress.open4gl.DateHolder;
+import opalib.api.DataType;
+import opalib.api.OpaStructureException;
+import opalib.opa.impl.TableUtils.ColDef;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +22,7 @@ import java.util.List;
  *
  */
 class DateConv {
-	private final static Logger logger = LoggerFactory.getLogger(Opa.class);
+	private final static Logger logger = LoggerFactory.getLogger(ProMap.class);
 
 	private final static List<IDateConvExt> extConverters = new ArrayList<>();
 

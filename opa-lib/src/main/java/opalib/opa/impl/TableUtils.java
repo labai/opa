@@ -1,19 +1,18 @@
 package opalib.opa.impl;
 
-import opalib.opa.Opa;
-import opalib.opa.Opa.DataType;
-import opalib.opa.Opa.IoDir;
-import opalib.opa.Opa.OpaField;
-import opalib.opa.Opa.OpaParam;
-import opalib.opa.Opa.OpaTable;
-import opalib.opa.Opa.OpaTransient;
-import opalib.opa.impl.Exceptions.OpaStructureException;
 import com.progress.open4gl.InputResultSet;
 import com.progress.open4gl.ResultSetHolder;
 import com.progress.open4gl.Rowid;
 import com.progress.open4gl.dynamicapi.MetaSchema;
 import com.progress.open4gl.dynamicapi.ResultSet;
 import com.progress.open4gl.dynamicapi.ResultSetMetaData;
+import opalib.api.DataType;
+import opalib.api.IoDir;
+import opalib.api.OpaField;
+import opalib.api.OpaParam;
+import opalib.api.OpaStructureException;
+import opalib.api.OpaTable;
+import opalib.api.OpaTransient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +22,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -32,6 +32,7 @@ import java.sql.SQLException;
 import java.sql.SQLType;
 import java.sql.SQLXML;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -39,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author Augustus
@@ -49,7 +51,7 @@ import java.util.function.Function;
  *
  */
 class TableUtils {
-	private final static Logger logger = LoggerFactory.getLogger(Opa.class);
+	private final static Logger logger = LoggerFactory.getLogger(ProMap.class);
 
 	/**
 	 *  a) if field in opp field list is provided, then fill it, otherwise (if null) - create ArrayList;
@@ -68,7 +70,7 @@ class TableUtils {
 				else if (list.isEmpty() == false) {
 					IoDir io = field.getAnnotation(OpaParam.class).io();
 					if (io == IoDir.INOUT)
-						list.clear(); // for in-out - clear input data
+					 	list.clear(); // for in-out - clear input data
 					else if (io == IoDir.OUT)
 						throw new OpaStructureException("List must be empty before call OpenEdge procedure (field=" + field.getName() + ")");
 				}
@@ -155,8 +157,7 @@ class TableUtils {
 
 		// Java entity field name map (name -> javaField)
 		Map<String, Field> entityFields = new LinkedHashMap<String, Field>();
-		for (Field field : clazz.getDeclaredFields()) {
-			field.setAccessible(true);
+		for (Field field : getClassDeclaredFields(clazz)) {
 			String name = getOpaName(field, allowOmitOpaField);
 			if (name == null)
 				continue;
@@ -289,6 +290,13 @@ class TableUtils {
 		return;
 	}
 
+	private static List<Field> getClassDeclaredFields(Class<?> clazz) {
+		return Arrays.stream(clazz.getDeclaredFields())
+				.filter(f -> !f.isSynthetic() && !Modifier.isStatic(f.getModifiers()))
+				.peek(f -> f.setAccessible(true))
+				.collect(Collectors.toList());
+	}
+
 	static java.sql.ResultSet listToResultSet (List<?> rowList, Class<?> clazz) {
 		return new OpaInputResultSet(rowList, clazz);
 	}
@@ -299,8 +307,7 @@ class TableUtils {
 
 		// get count
 		int iCount = 0;
-		for (Field field : clazz.getDeclaredFields()) {
-			field.setAccessible(true);
+		for (Field field : getClassDeclaredFields(clazz)) {
 			if (getOpaName(field, allowOmitOpaField) == null)
 				continue;
 			iCount++;
@@ -309,13 +316,12 @@ class TableUtils {
 		ResultSetMetaData metaData;
 		metaData = new ResultSetMetaData(0, iCount);
 		int iPos = 0;
-		for (Field field : clazz.getDeclaredFields()) {
-			field.setAccessible(true);
+		for (Field field : getClassDeclaredFields(clazz)) {
 			String name = getOpaName(field, allowOmitOpaField);
 			if (name == null)
 				continue;
 			iPos++;
-			metaData.setFieldDesc(iPos, name, 0, guessAblType(field).progressId);
+			metaData.setFieldDesc(iPos, name, 0, ProMap.getProgressId(guessAblType(field)));
 		}
 
 		return metaData;
@@ -327,8 +333,7 @@ class TableUtils {
 		MetaSchema metaschema = new MetaSchema();
 		int iPos = 1;
 		boolean found = false;
-		for (Field field : paramsClass.getDeclaredFields()) {
-			field.setAccessible(true);
+		for (Field field : getClassDeclaredFields(paramsClass)) {
 			OpaParam pp = field.getAnnotation(OpaParam.class);
 			if (pp == null) continue; // ignore free fields
 
@@ -338,7 +343,7 @@ class TableUtils {
 				throw new OpaStructureException("Entity table must have @OpaTable annotation (table=" + pp.table().getName() + ")");
 			} else {
 				//if (tp.equals("List")) ;
-				metaschema.addResultSetSchema(extractMetaData(pp.table()), iPos, pp.io().progressId);
+				metaschema.addResultSetSchema(extractMetaData(pp.table()), iPos, ProMap.getProgressId(pp.io()));
 				found = true;
 			}
 			iPos++;
@@ -472,8 +477,7 @@ class TableUtils {
 			Class<?> clazz = bean.getClass();
 			boolean allowOmitOpaField = clazz.getAnnotation(OpaTable.class).allowOmitOpaField();
 
-			for (Field field : clazz.getDeclaredFields()) {
-				field.setAccessible(true);
+			for (Field field : getClassDeclaredFields(clazz)) {
 				if (getOpaName(field, allowOmitOpaField) == null)
 					continue;
 				Class<?> type = field.getType();

@@ -1,7 +1,7 @@
 package opalib.opa.impl;
 
-import opalib.opa.Opa.DataType;
-import opalib.opa.impl.Exceptions.OpaStructureException;
+import opalib.api.DataType;
+import opalib.api.OpaStructureException;
 
 import java.util.HashMap;
 import java.util.Map;

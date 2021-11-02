@@ -1,6 +1,6 @@
 package opalib.opa.impl;
 
-import opalib.opa.Opa.DataType;
+import opalib.api.DataType;
 import opalib.opa.impl.DateConv.IDateConvExt;
 
 import java.lang.reflect.Field;

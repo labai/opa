@@ -1,6 +1,6 @@
 package opalib.opa.impl;
 
-import opalib.opa.OpaException;
+import opalib.api.OpaException;
 
 /**
  * @author Augustus
@@ -16,21 +16,6 @@ class Exceptions {
 	static class OpaSessionTimeoutException extends OpaException {
 		OpaSessionTimeoutException() {
 			super("Session timeout");
-		}
-	}
-
-	/**
-	 * Data, data type, structure and etc exceptions.
-	 */
-	static class OpaStructureException extends OpaException {
-		private static final long serialVersionUID = 1L;
-		public OpaStructureException() {
-		}
-		OpaStructureException(String message) {
-			super(message);
-		}
-		OpaStructureException(String message, Throwable cause) {
-			super(message, cause);
 		}
 	}
 

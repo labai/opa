@@ -1,9 +1,5 @@
 package opalib.opa.impl;
 
-import opalib.opa.OpaServer.RunResult;
-import opalib.opa.impl.AppServer.RequestIdProvider;
-import opalib.opa.impl.Exceptions.OpaSessionTimeoutException;
-import opalib.opa.impl.Exceptions.OpaStructureException;
 import com.progress.common.ehnlog.IAppLogger;
 import com.progress.open4gl.Open4GLException;
 import com.progress.open4gl.ResultSetHolder;
@@ -13,6 +9,10 @@ import com.progress.open4gl.dynamicapi.ParameterSet;
 import com.progress.open4gl.dynamicapi.ResultSet;
 import com.progress.open4gl.dynamicapi.RqContext;
 import com.progress.open4gl.javaproxy.AppObject;
+import opalib.api.OpaStructureException;
+import opalib.opa.OpaServer.RunResult;
+import opalib.opa.impl.AppServer.RequestIdProvider;
+import opalib.opa.impl.Exceptions.OpaSessionTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

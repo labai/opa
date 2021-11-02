@@ -4,11 +4,12 @@ package opalib.opa;
  * Created by Augustus on 2015.02.10.
  */
 public class TestParams {
-	// disable all tests, as it is integration tests
-	final static public boolean INT_TESTS_ENABLED = false;
 
-	final static public String APP_SERVER = "AppServer://progress.app.server/asprosv";
-	final static public String APP_SERVER_STATELESS = "AppServer://progress.app.server/asstls";
+	// disable all tests, as it is integration tests
+	final static public boolean INT_TESTS_ENABLED = true;
+
+	final static public String APP_SERVER = "http://localhost:8810/apsv";
+	final static public String APP_SERVER_STATELESS = "http://localhost:8810/apsv";
 	final static public String APP_USER = "-";
 	final static public String APP_PASSWORD = "-";
 

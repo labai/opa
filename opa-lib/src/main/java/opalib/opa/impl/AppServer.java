@@ -1,16 +1,14 @@
 package opalib.opa.impl;
 
-import opalib.opa.Opa;
-import opalib.opa.OpaException;
-import opalib.opa.OpaServer.RunResult;
-import opalib.opa.OpaServer.SessionModel;
-import opalib.opa.impl.Exceptions.OpaSessionTimeoutException;
-import opalib.opa.impl.Exceptions.OpaStructureException;
-import opalib.opa.impl.Pool.ConnParams;
-import opalib.opa.impl.Pool.JpxConnPool;
 import com.progress.open4gl.Open4GLException;
 import com.progress.open4gl.RunTime4GLException;
 import com.progress.open4gl.javaproxy.Connection;
+import opalib.api.OpaException;
+import opalib.opa.OpaServer.RunResult;
+import opalib.opa.OpaServer.SessionModel;
+import opalib.opa.impl.Exceptions.OpaSessionTimeoutException;
+import opalib.opa.impl.Pool.ConnParams;
+import opalib.opa.impl.Pool.JpxConnPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +22,7 @@ import java.sql.SQLException;
  *
  */
 public class AppServer {
-	private final static Logger logger = LoggerFactory.getLogger(Opa.class);
+	private final static Logger logger = LoggerFactory.getLogger(ProMap.class);
 
 	static final String PROGRESS_PROPS_KEY_SESSION_MODEL = "PROGRESS.Session.sessionModel";
 	static final String PROGRESS_PROPS_KEY_CONTEXT_ID = "PROGRESS.Session.ClientContextID";
@@ -32,7 +30,7 @@ public class AppServer {
 	private static final long DEFAULT_WAIT_TIMEOUT_MILIS = 30000L; // 30 s
 	private static final int DEFAULT_MAX_CONN = 10;
 
-	private final JpxConnPool pool;
+	private JpxConnPool pool;
 
 	public interface RequestIdProvider {
 		String get();
@@ -44,7 +42,7 @@ public class AppServer {
 
 	public AppServer(String serverUrl, String userName, String password, SessionModel sessionModel) {
 		super();
-		GenericObjectPoolConfig poolConfig = new GenericObjectPoolConfig();
+		GenericObjectPoolConfig<JavaProxyAgent> poolConfig = new GenericObjectPoolConfig<>();
 		poolConfig.setMaxWaitMillis(DEFAULT_WAIT_TIMEOUT_MILIS);
 		poolConfig.setMaxTotal(DEFAULT_MAX_CONN);
 		ConnParams connParams = new ConnParams(serverUrl, userName, password, sessionModel);
@@ -57,11 +55,29 @@ public class AppServer {
 	}
 
 	// Remarks:
-	// - procName can be null (then proc name must be set in @OpaProc))
+	// - procName can be null (then proc name must be set in @OpaProc)
 	//
 	public RunResult runProc(Object opp, String procName, RequestIdProvider requestIdProvider) throws OpaException {
+		RunResult result = null;
+		boolean sessionExpired = false;
+		try {
+			result = runJpx(opp, procName, requestIdProvider);
+		} catch (OpaSessionTimeoutException e) {
+			// session timeout - retry
+			sessionExpired = true;
+			logger.debug("runProc OpaSessionTimeoutException, will try again: {}", e.getMessage());
+		}
+		if (sessionExpired)
+			result = runJpx(opp, procName, requestIdProvider);
+		return result;
+
+	}
+
+	private RunResult runJpx(Object opp, String procName, RequestIdProvider requestIdProvider) {
 		JavaProxyAgent jpx;
-		JavaProxyAgent jpx2 = null;
+		Throwable raised = null;
+		RunResult result = null;
+		boolean destroyAgent = false;
 		try {
 			jpx = pool.borrowObject();
 		} catch (Exception ex) {
@@ -69,63 +85,44 @@ public class AppServer {
 		}
 
 		try {
-			try {
-				return jpx.runProc(opp, procName, requestIdProvider);
-			} catch (OpaStructureException e) {
-				throw e;
-			} catch (RunTime4GLException e) {
-				throw new OpaException("4GL runtime error: " + e.getMessage(), e);
-			} catch (SQLException e) {
-				throw new OpaException("4GL ResultSet error: " + e.getMessage(), e);
-			} catch (Open4GLException e) {
-				// can happen due to network problems
-				throw new OpaException("Open4GL error: " + e.getMessage(), e);
-			} catch (OpaSessionTimeoutException e) {
-				logger.debug("runProc(1) OpaSessionTimeoutException, will try again: {}", e.getMessage());
-				// session timeout - retry
-			}
+			result = jpx.runProc(opp, procName, requestIdProvider);
+		} catch (RunTime4GLException e) {
+			destroyAgent = true;
+			raised = new OpaException("4GL runtime error: " + e.getMessage(), e);
+		} catch (SQLException e) {
+			destroyAgent = true;
+			raised = new OpaException("4GL ResultSet error: " + e.getMessage(), e);
+		} catch (Open4GLException e) {
+			// can happen due to network problems
+			destroyAgent = true;
+			raised = new OpaException("Open4GL error: " + e.getMessage(), e);
+		} catch (Throwable e) {
+			destroyAgent = true;
+			raised = e;
+		}
 
+		if (destroyAgent) {
 			try {
 				pool.invalidateObject(jpx);
-				jpx = null;
 			} catch (Exception e) {
 				logger.warn("Cannot invalidate connection in pool: " + e.getMessage(), e);
 			}
-
-			// retry
+		} else {
 			try {
-				jpx2 = pool.borrowObject();
+				pool.returnObject(jpx);
 			} catch (Exception e) {
-				throw new OpaException("Cannot restart connection in pool", e);
-			}
-
-			try {
-				return jpx2.runProc(opp, procName, requestIdProvider);
-			} catch (RunTime4GLException e) {
-				throw new OpaException("4GL runtime error: " + e.getMessage(), e);
-			} catch (SQLException e) {
-				throw new OpaException("4GL ResultSet error: " + e.getMessage(), e);
-			} catch (Open4GLException e) {
-				throw new OpaException("Recurrent 4GL execution error: " + e.getMessage(), e);
-			}
-
-		}
-		finally {
-			if (jpx != null) {
-				try {
-					pool.returnObject(jpx);
-				} catch (Exception e) {
-					logger.error("Cannot return connection to pool: " + e.getMessage(), e);
-				}
-			}
-			if (jpx2 != null) {
-				try {
-					pool.returnObject(jpx2);
-				} catch (Exception e) {
-					logger.error("Cannot return connection(2) to pool: " + e.getMessage(), e);
-				}
+				logger.error("Cannot return connection to pool: " + e.getMessage(), e);
 			}
 		}
+
+		if (raised != null) {
+			if (raised instanceof RuntimeException)
+				throw (RuntimeException) raised;
+			else
+				throw new RuntimeException(raised);
+		}
+
+		return result;
 	}
 
 
@@ -163,9 +160,7 @@ public class AppServer {
 	}
 
 	/** package scoped. For testing only */
-	JpxConnPool getPool() {
-		return pool;
-	}
-
+	JpxConnPool getPool() { return pool; }
+	void setPool(JpxConnPool pool) { this.pool = pool; }
 
 }

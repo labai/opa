@@ -1,9 +1,9 @@
 package opalib.opa.impl;
 
-import opalib.opa.Opa.IoDir;
-import opalib.opa.Opa.OpaParam;
-import opalib.opa.Opa.OpaProc;
-import opalib.opa.OpaException;
+import opalib.api.IoDir;
+import opalib.api.OpaException;
+import opalib.api.OpaParam;
+import opalib.api.OpaProc;
 import opalib.opa.OpaServer.SessionModel;
 import opalib.opa.TestParams;
 import org.junit.After;
@@ -55,7 +55,7 @@ public class I08PoolTest {
 		@OpaParam(io= IoDir.OUT)
 		public String errorCode;
 
-		@OpaParam(io= IoDir.OUT)
+		@OpaParam(io=IoDir.OUT)
 		public String errorMessage;
 	}
 

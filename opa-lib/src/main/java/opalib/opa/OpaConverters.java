@@ -1,5 +1,6 @@
 package opalib.opa;
 
+import opalib.api.DataType;
 import opalib.opa.impl._OpaDataConvUtils;
 
 import java.util.function.Function;
@@ -16,7 +17,7 @@ import java.util.function.Function;
  */
 public class OpaConverters {
 
-    public static <T> void registerTypeConverter(Opa.DataType dataType, Class<T> pojoFieldClass, Function<String, T> convToPojo, Function <T, ?> convToAbl) {
+    public static <T> void registerTypeConverter(DataType dataType, Class<T> pojoFieldClass, Function<String, T> convToPojo, Function <T, ?> convToAbl) {
     	_OpaDataConvUtils.registerTypeConverter(dataType, pojoFieldClass, convToPojo, convToAbl);
     }
 

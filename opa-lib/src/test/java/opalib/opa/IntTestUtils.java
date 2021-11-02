@@ -1,11 +1,11 @@
 package opalib.opa;
 
-import opalib.opa.Opa.DataType;
-import opalib.opa.Opa.OpaField;
-import opalib.opa.Opa.OpaTable;
-import opalib.opa.Opa.OpaTransient;
-import opalib.opa.OpaServer.SessionModel;
 import com.progress.open4gl.Rowid;
+import opalib.api.DataType;
+import opalib.api.OpaField;
+import opalib.api.OpaTable;
+import opalib.api.OpaTransient;
+import opalib.opa.OpaServer.SessionModel;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
