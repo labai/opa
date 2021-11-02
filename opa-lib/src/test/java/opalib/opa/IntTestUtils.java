@@ -90,7 +90,7 @@ public class IntTestUtils {
 		return createOpaServer(url, SessionModel.STATE_FREE);
 	}
 	public static OpaServer createOpaServer(String url, SessionModel sessionModel) {
-		OpaServer server = new OpaServer(url, "-", "-", sessionModel);
+		OpaServer server = new OpaServer(url, "", "", sessionModel);
 		if (url.startsWith("https://")) {
 			String psccerts = Thread.currentThread().getContextClassLoader().getResource(TestParams.APP_PSCCERTS).getFile();
 			server.setCertificateStore(psccerts);

@@ -1,6 +1,4 @@
 /*
-    jpx/test/opa/test_07_wait.p
-
     just wait n seconds
 */
 

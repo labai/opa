@@ -1,5 +1,10 @@
 Version history
 
+1.5.2 (2021-11-02)
+- change package names, extract opa-api
+- discard connection on exception
+- skip synthetic fields in data classes (jococo issue)
+
 1.4.5 (2021-05-25)
 - cleanup idle connections after 4 minutes
 - add shutdown method

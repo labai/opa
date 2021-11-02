@@ -3,7 +3,7 @@
 
     <groupId>com.github.labai</groupId>
     <artifactId>opa</artifactId>
-    <version>1.5.0-SNAPSHOT</version>
+    <version>1.5.2</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -53,19 +53,34 @@
             <artifactId>slf4j-api</artifactId>
             <version>1.7.32</version>
         </dependency>
-        <!-- scope: provided -->
 
+        <!-- dependency to OE - here scope is 'provided' - add to your project manually -->
         <dependency>
             <groupId>com.progress.openedge</groupId>
             <artifactId>o4glrt</artifactId>
-            <version>12.0</version>
+            <version>12.2.0</version>
             <scope>provided</scope>
             <!-- o4glrt.jar from OpenEdge install dir must be provided.
                 TIP: it can be placed somewhere in maven repository (local) as maven artifact like this.
             -->
         </dependency>
+        <!-- starting from 12 version messages.jar also is required in addition to o4glrt.jar at compile time -->
+        <dependency>
+            <groupId>com.progress.openedge</groupId>
+            <artifactId>messages</artifactId>
+            <version>12.2.0</version>
+            <scope>provided</scope>
+        </dependency>
 
-        <!-- addition dependencies for o4glrt -->
+        <!-- all those jars are required for runtime (http or https)
+            - do not forget to add in your project if using OE 12.2
+        -->
+        <dependency>
+            <groupId>com.progress.openedge</groupId>
+            <artifactId>oeauth</artifactId>
+            <version>12.2.0</version>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
@@ -75,7 +90,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.10</version>
+            <version>4.5.13</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
